@@ -24,17 +24,16 @@ body {
 /* Mobile */
 @media (max-width: 480px) {
   .cadre {
-    width: 100%;
-    max-width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
     height: 100vh;
     margin: 0;
     border-radius: 0;
-    padding: 10px;
-  }
-  body {
-    overflow: hidden;
   }
 }
+
 
 /* Container principal */
 .container {
