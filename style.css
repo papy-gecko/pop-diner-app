@@ -1,0 +1,424 @@
+/* Body */
+body {
+  background: #000;
+  font-family: Arial, sans-serif;
+  color: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+/* Cadre principal */
+.cadre {
+  
+  background: #5ebec9;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  box-sizing: border-box;
+  margin: 20px auto;
+  display: block;
+  border: 1px solid #ffffff;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .cadre {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    margin: 0;
+    border-radius: 0;
+    padding: 10px;
+  }
+  body {
+    overflow: hidden;
+  }
+}
+
+/* Container principal */
+.container {
+  border: 1px solid #ffffff;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  background: #000000;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Bannière */
+.banner-image {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: auto;
+  max-height: 150px;
+  object-fit: contain;
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* Menu déroulant */
+#menu {
+  grid-column: 1 / -1;
+}
+
+/* Labels et champs */
+label {
+  border: 1px solid #ffffff;
+  background: #e91e63;
+  padding: 5px;
+  border-radius: 3px;
+  font-weight: bold;
+  text-align: center;
+  font-size: clamp(12px, 2vw, 16px);
+}
+
+input, select {
+  border: 1px solid #ffffff;
+  background: #b2ebf2;
+  padding: 5px;
+  border-radius: 3px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: clamp(12px, 2vw, 16px);
+}
+
+input:disabled {
+  border: 1px solid #ffffff;
+  background: #ddd !important;
+  color: #666;
+  cursor: not-allowed;
+}
+
+select option {
+  font-size: clamp(12px, 2vw, 16px);
+  text-align: center;
+}
+
+input[type="checkbox"] {
+  width: auto;
+  transform: scale(1.5);
+  margin: auto;
+  display: block;
+  accent-color: #5ebec9;
+}
+
+.rose-select {
+  border: 1px solid #ffffff;
+  background: #e91e63;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Pleine largeur */
+.full-width {
+  width: 100%;
+}
+
+/* Ticket restaurant */
+.ticket-row {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  align-items: center;
+  width: 100%;
+}
+
+.ticket-row label {
+  justify-self: start;
+}
+
+.ticket-row input[type="checkbox"] {
+  justify-self: center;
+}
+
+.ticket-row input[type="number"] {
+  justify-self: end;
+  width: clamp(50px, 10vw, 80px);
+  font-size: clamp(12px, 2vw, 16px);
+  margin: 0;
+}
+
+/* Status et erreurs */
+.status {
+  color: #4CAF50;
+  font-size: clamp(12px, 2vw, 14px);
+  text-align: center;
+  grid-column: 1 / -1;
+}
+
+.error {
+  color: #f44336 !important;
+}
+
+/* Boutons */
+#enregistrer, #validerNouveauClient {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+  margin-top: 10px;
+  font-size: clamp(14px, 2.5vw, 16px);
+}
+
+#enregistrer:hover, #validerNouveauClient:hover {
+  background: #45a049;
+}
+
+/* Nouveau client */
+#nouveauClientContainer {
+  display: none;
+  margin-bottom: 10px;
+  width: 100%;
+  grid-column: 1 / -1;
+}
+
+#nouveauClientInput {
+  width: 100%;
+  margin-top: 5px;
+  font-size: clamp(12px, 2vw, 16px);
+}
+
+
+en mode telphone il reste du noir sur le coter du cadre 
+* Pour le formulaire de login */
+#loginForm .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #000000;
+  padding: 20px;
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  gap: 10px;
+}
+/* Largeur uniforme pour label, input et bouton */
+#loginForm .container label,
+#loginForm .container input,
+#loginForm #loginButton {
+  width: 100%; /* Prend toute la largeur du conteneur */
+  max-width: 300px; /* Largeur maximale identique pour tous */
+  box-sizing: border-box; /* Inclut le padding dans la largeur */
+}
+/* Style des labels */
+#loginForm .container label {
+  border: 1px solid #ffffff;
+  background: #e91e63;
+  padding: 8px;
+  border-radius: 3px;
+  font-weight: bold;
+  color: #fff;
+  font-size: 16px;
+  text-align: center;
+}
+/* Style des inputs */
+#loginForm .container input {
+  border: 1px solid #ffffff;
+  background: #b2ebf2;
+  padding: 10px;
+  border-radius: 3px;
+  text-align: center;
+  font-size: 16px;
+}
+/* Style du bouton */
+#loginButton {
+  background: #fa2759;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 5px;
+  border: 1px solid #ffffff;
+}
+#loginButton:hover {
+  background: #fd5a80;
+}
+/* Style de la bannière */
+#loginForm .banner-image {
+  width: 100%;
+  max-width: 300px; /* Même largeur que les éléments du formulaire */
+  height: auto;
+  max-height: 120px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+/* Pour centrer le cadre */
+#loginForm .cadre {
+  
+  width: 90%;
+  max-width: 350px; /* Légèrement plus large que les éléments pour un meilleur rendu */
+}
+
+
+
+/* Infos utilisateur */
+#userInfo {
+  grid-column: 1 / -1;
+  background: #2196F3;
+  padding: 8px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  display: none;
+  text-align: center;
+}
+
+#logoutButton {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+/* Mobile specific */
+@media (max-width: 480px) {
+  .banner-image {
+    max-height: 50px;
+  }
+  label, input, select, #enregistrer, #validerNouveauClient, #nouveauClientInput {
+    font-size: 8px;
+  }
+  .ticket-row input[type="number"] {
+    width: 60px;
+  }
+}
+/* Pour le formulaire de login */
+#loginForm {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Style du cadre */
+#loginForm .cadre {
+  width: 90%;
+  max-width: 350px;
+  background: #5ebec9;
+  padding: 20px;
+  border-radius: 12px;
+  border: 3px solid #2196F3;
+  margin: 0;
+}
+
+/* Conteneur interne */
+#loginForm .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #000000;
+  padding: 20px;
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  gap: 10px;
+}
+
+/* Largeur uniforme pour label, input et bouton */
+#loginForm .container label,
+#loginForm .container input,
+#loginForm #loginButton {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Style des labels */
+#loginForm .container label {
+  border: 1px solid #ffffff;
+  background: #e91e63;
+  padding: 8px;
+  border-radius: 3px;
+  font-weight: bold;
+  color: #fff;
+  font-size: 16px;
+  text-align: center;
+}
+
+/* Style des inputs */
+#loginForm .container input {
+  border: 1px solid #ffffff;
+  background: #b2ebf2;
+  padding: 10px;
+  border-radius: 3px;
+  text-align: center;
+  font-size: 16px;
+}
+
+/* Style du bouton */
+#loginButton {
+  background: #fa2759;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 5px;
+  border: 1px solid #ffffff;
+}
+
+#loginButton:hover {
+  background: #fd5a80;
+}
+
+/* Style de la bannière */
+#loginForm .banner-image {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  max-height: 120px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+/* Adaptation mobile */
+@media (max-width: 480px) {
+  #loginForm .cadre {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  #loginForm .container {
+    border-radius: 0;
+    padding: 15px;
+    width: 100%;
+    max-width: none;
+  }
+
+  #loginForm .container label,
+  #loginForm .container input,
+  #loginForm #loginButton {
+    max-width: none;
+  }
+
+  #loginForm .banner-image {
+    max-width: 90%;
+  }
+}

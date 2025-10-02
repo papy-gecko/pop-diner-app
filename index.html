@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Compta Pop's Diner</title>
+    <link rel="stylesheet" href="style.css?v=1">
+    <script src="script.js?v=1" defer></script>
+</head>
+<body>
+ <!-- Formulaire de login -->
+<div id="loginForm">
+  <div class="cadre">
+    <div class="container">
+      <img src="https://i.postimg.cc/sgJn040S/SGS25NG.png" alt="Bannière" class="banner-image">
+      <label>Connexion - Pop's Diner</label>      
+      <input type="text" id="loginUsername" placeholder="Nom d'utilisateur">
+      <input type="password" id="loginPassword" placeholder="Mot de passe">
+      <button id="loginButton">Se connecter</button>
+      <p id="loginError" class="error"></p>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Conteneur principal (caché au démarrage) -->
+  <div id="appContainer" style="display: none;">
+    <div id="userInfo">
+      Connecté en tant que <span id="currentUserName"></span> (<span id="currentUserRole"></span>)
+      <button id="logoutButton">Déconnexion</button>
+    </div>
+
+    <div class="cadre">
+      <div class="container">
+        <img src="https://i.postimg.cc/sgJn040S/SGS25NG.png" alt="Bannière" class="banner-image">
+
+        <!-- Date et semaine -->
+        <label>Date du jour</label>
+        <input type="text" id="dateJour" readonly>
+        <label>Jour</label>
+        <input type="text" id="jourLettre">
+        <label>N° de semaine</label>
+        <input type="text" id="numSemaine">
+
+        <!-- Employé -->
+        <label>Employé</label>
+        <input type="text" id="employe" readonly>
+
+
+        <!-- Contrat -->
+        <label>Contrat entreprise</label>
+        <select id="contrat_entreprise">
+          <option value="">Sans contrat</option>
+        </select>
+
+        <!-- Client -->
+        <label>Client</label>
+        <select id="noms_des_client">
+          <option value="">-</option>
+          <option value="nouveau">+ Nouveau client...</option>
+        </select>
+
+        <!-- Champ pour ajouter un nouveau client -->
+        <div id="nouveauClientContainer">
+          <input type="text" id="nouveauClientInput" placeholder="Nom du nouveau client">
+          <button id="validerNouveauClient">Ajouter</button>
+        </div>
+
+        <!-- Menu -->
+        <select id="menu" class="full-width rose-select">
+          <option value="sans menu">sans menu</option>
+        </select>
+
+        <!-- Produits -->
+        <select class="rose-select product-select" data-type="plat" data-position="1">
+          <option value="">-</option>
+        </select>
+        <input type="number" min="0" value="0" class="product-quantity" data-type="plat" data-position="1">
+
+        <select class="rose-select product-select" data-type="accompagnement" data-position="2">
+          <option value="">-</option>
+        </select>
+        <input type="number" min="0" value="0" class="product-quantity" data-type="accompagnement" data-position="2">
+
+        <select class="rose-select product-select" data-type="dessert" data-position="3">
+          <option value="">-</option>
+        </select>
+        <input type="number" min="0" value="0" class="product-quantity" data-type="dessert" data-position="3">
+
+        <select class="rose-select product-select" data-type="boisson" data-position="4">
+          <option value="">-</option>
+        </select>
+        <input type="number" min="0" value="0" class="product-quantity" data-type="boisson" data-position="4">
+
+        <select class="rose-select product-select" data-type="optionnel" data-position="5">
+          <option value="">-</option>
+        </select>
+        <input type="number" min="0" value="0" class="product-quantity" data-type="optionnel" data-position="5">
+
+        <!-- Ticket restaurant -->
+        <label>Ticket restaurant</label>
+        <div class="ticket-row">
+          <input type="checkbox" id="ticket">
+          <input type="number" id="ticketNombre" min="1" value="0" class="product-quantity" placeholder="Nombre" disabled>
+        </div>
+
+        <!-- Totaux -->
+        <label>Coût global matière première</label>
+        <input type="text" id="coutGlobalMatierePremiere" value="0 €" readonly>
+        <label>Prix à faire payer</label>
+        <input type="text" id="PrixAFairePayer" value="0 €" readonly>
+        <label>Bénéfice</label>
+        <input type="text" id="benefice" value="0 €" readonly>
+
+        <!-- Bouton d'envoi -->
+        <button id="enregistrer">Enregistrer la commande</button>
+        <!-- Statut -->
+        <div id="status" class="status"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
