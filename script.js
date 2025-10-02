@@ -1,4 +1,4 @@
-// URL de l'API Google Apps Script
+
 const webAppUrl = "https://script.google.com/macros/s/AKfycbx-KLhig1l6aLqe148kmCOr0jzCjf0lCNk_pidvEBtSuuRyMOzmHeXTji3PUWIbdWJo1Q/exec";
 
 // Variables globales
@@ -75,8 +75,8 @@ async function login() {
     };
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('appContainer').style.display = 'block';
-    document.getElementById('currentUserName').textContent = username;
-    document.getElementById('currentUserRole').textContent = result.role || "employe";
+    
+    
     document.getElementById('employe').value = result.employe || username; // Remplit le champ employé
     document.getElementById('userInfo').style.display = 'block';
     await loadAllData();
@@ -508,3 +508,168 @@ document.addEventListener('DOMContentLoaded', () => {
   updateDateInfo();
   loadAllData();
 });
+// Gestion du menu options
+document.addEventListener('DOMContentLoaded', function() {
+  // Vérification de "Se rappeler de moi"
+  const rememberedUsername = localStorage.getItem('rememberedUsername');
+  const rememberMeChecked = localStorage.getItem('rememberMe') === 'true';
+
+  if (rememberedUsername && rememberMeChecked) {
+    document.getElementById('loginUsername').value = rememberedUsername;
+    document.getElementById('rememberMe').checked = true;
+  }
+
+  // Menu options
+  const optionsToggle = document.getElementById('optionsToggle');
+  const optionsDropdown = document.getElementById('optionsDropdown');
+
+  if (optionsToggle && optionsDropdown) {
+    optionsToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      optionsDropdown.classList.toggle('show');
+    });
+
+    // Fermer le menu quand on clique ailleurs
+    document.addEventListener('click', function() {
+      optionsDropdown.classList.remove('show');
+    });
+
+    // Empêcher la fermeture quand on clique dans le menu
+    optionsDropdown.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+  }
+
+  // Gestion du changement de mot de passe
+  const changePasswordButton = document.getElementById('changePasswordButton');
+  const changePasswordForm = document.getElementById('changePasswordForm');
+  const cancelChangePasswordButton = document.getElementById('cancelChangePasswordButton');
+
+  if (changePasswordButton && changePasswordForm && cancelChangePasswordButton) {
+    changePasswordButton.addEventListener('click', function() {
+      changePasswordForm.style.display = 'flex';
+    });
+
+    cancelChangePasswordButton.addEventListener('click', function() {
+      changePasswordForm.style.display = 'none';
+      document.getElementById('changePasswordError').textContent = '';
+      document.getElementById('currentPasswordInput').value = '';
+      document.getElementById('newPasswordInput').value = '';
+      document.getElementById('confirmNewPasswordInput').value = '';
+    });
+  }
+
+  // Validation du changement de mot de passe
+  const confirmChangePasswordButton = document.getElementById('confirmChangePasswordButton');
+  if (confirmChangePasswordButton) {
+    confirmChangePasswordButton.addEventListener('click', async function() {
+      const currentPassword = document.getElementById('currentPasswordInput').value;
+      const newPassword = document.getElementById('newPasswordInput').value;
+      const confirmNewPassword = document.getElementById('confirmNewPasswordInput').value;
+      const errorElement = document.getElementById('changePasswordError');
+
+      // Validation des champs
+      if (!currentPassword || !newPassword || !confirmNewPassword) {
+        errorElement.textContent = "Tous les champs sont obligatoires";
+        return;
+      }
+
+      if (newPassword !== confirmNewPassword) {
+        errorElement.textContent = "Les nouveaux mots de passe ne correspondent pas";
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        errorElement.textContent = "Le mot de passe doit contenir au moins 6 caractères";
+        return;
+      }
+
+      // Appel à l'API pour changer le mot de passe
+      try {
+        const response = await fetch(webAppUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "changePassword",
+            username: currentUser.username,
+            currentPassword: currentPassword,
+            newPassword: newPassword
+          })
+        });
+
+        // Vérification basique de la réponse
+        changePasswordForm.style.display = 'none';
+        errorElement.textContent = '';
+        document.getElementById('currentPasswordInput').value = '';
+        document.getElementById('newPasswordInput').value = '';
+        document.getElementById('confirmNewPasswordInput').value = '';
+
+        // Message de succès
+        setStatus("Mot de passe changé avec succès !", false);
+
+      } catch (error) {
+        errorElement.textContent = "Erreur lors du changement de mot de passe: " + error.message;
+      }
+    });
+  }
+
+  // Gestion de la déconnexion
+  const logoutButton = document.getElementById('logoutButton');
+  if (logoutButton) {
+    logoutButton.addEventListener('click', function() {
+      logout();
+    });
+  }
+});
+
+// Fonction de déconnexion existante (à garder)
+function logout() {
+  currentUser = null;
+  currentPassword = "";
+  document.getElementById('appContainer').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'flex';
+  document.getElementById('loginUsername').value = '';
+  document.getElementById('loginPassword').value = '';
+}
+
+// Fonction de connexion modifiée pour gérer "Se rappeler de moi"
+async function login() {
+  const username = document.getElementById('loginUsername').value;
+  const password = document.getElementById('loginPassword').value;
+  const rememberMe = document.getElementById('rememberMe').checked;
+
+  if (!username || !password) {
+    setStatus("Veuillez remplir tous les champs.", true, 'loginError');
+    return false;
+  }
+
+  // Sauvegarde le nom d'utilisateur si "Se rappeler de moi" est coché
+  if (rememberMe) {
+    localStorage.setItem('rememberedUsername', username);
+    localStorage.setItem('rememberMe', 'true');
+  } else {
+    localStorage.removeItem('rememberedUsername');
+    localStorage.removeItem('rememberMe');
+  }
+
+  currentPassword = password;
+  const result = await fetchData("verifyUser", { username, password });
+
+  if (result?.success) {
+    currentUser = {
+      username,
+      role: result.role || "employe",
+      employe: result.employe || username
+    };
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'block';
+    document.getElementById('employe').value = result.employe || username;
+    document.getElementById('userInfo').style.display = 'flex';
+    await loadAllData();
+    return true;
+  } else {
+    setStatus(result?.error || "Identifiants incorrects.", true, 'loginError');
+    return false;
+  }
+}
