@@ -21,18 +21,43 @@ body {
   border: 1px solid #ffffff;
 }
 
-/* Mobile */
 @media (max-width: 480px) {
+  body {
+    margin: 0;
+    padding: 0;
+    background: #5ebec9; /* Même couleur que ton cadre */
+    overflow-x: hidden;  /* Empêche le scroll horizontal */
+  }
+
   .cadre {
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 100vw;
+    max-width: 100vw;
     height: 100vh;
     margin: 0;
+    padding: 10px;
     border-radius: 0;
+    border: none;
+    box-sizing: border-box;
+  }
+
+  .container {
+    display: block; /* plus de grid pour mobile */
+    width: 100%;
+    padding: 0;
+    gap: 0;
+  }
+
+  label, input, select, #enregistrer, #validerNouveauClient, #nouveauClientInput {
+    font-size: clamp(12px, 4vw, 16px);
+  }
+
+  .banner-image {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
   }
 }
+
 
 
 /* Container principal */
