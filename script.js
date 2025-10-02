@@ -64,7 +64,7 @@ async function login() {
     setStatus("Veuillez remplir tous les champs.", true, 'loginError');
     return false;
   }
-  setStatus("Connexion en cours...", false, 'loginError');
+  
   currentPassword = password;
   const result = await fetchData("verifyUser", { username, password });
   if (result?.success) {
@@ -80,7 +80,7 @@ async function login() {
     document.getElementById('employe').value = result.employe || username; // Remplit le champ employé
     document.getElementById('userInfo').style.display = 'block';
     await loadAllData();
-    setStatus(`Connecté en tant que ${username} (${result.role || "employe"}).`);
+    
     return true;
   } else {
     setStatus(result?.error || "Identifiants incorrects.", true, 'loginError');
@@ -97,7 +97,7 @@ function logout() {
   document.getElementById('loginForm').style.display = 'flex';
   document.getElementById('loginUsername').value = '';
   document.getElementById('loginPassword').value = '';
-  setStatus("Déconnecté.", false, 'loginError');
+  
 }
 
 // Calcule le numéro de la semaine
@@ -194,13 +194,10 @@ function fillSelect(selectElement, options, valueKey = null, textKey = null, dat
 
 // Charge toutes les données
 async function loadAllData() {
-  setStatus("Chargement des données...");
+  
   const result = await fetchData("getAllData");
 
-  if (result?.success === false) {
-    setStatus(`Erreur: ${result.error || "Impossible de charger les données"}`, true);
-    return;
-  }
+ 
 
   allData = result;
 
@@ -222,7 +219,7 @@ async function loadAllData() {
   });
 
   ticketUnitValue = allData.ticketValue || 8;
-  setStatus("Données chargées.");
+  
 }
 
 // Active le mode libre
