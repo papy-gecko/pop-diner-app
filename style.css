@@ -53,6 +53,8 @@ body {
   }
 }
 
+
+
 /* Container principal */
 .container {
   border: 1px solid #ffffff;
@@ -140,7 +142,7 @@ input[type="checkbox"] {
 /* Ticket restaurant */
 .ticket-row {
   display: grid;
-  grid-template-columns: auto auto auto;
+  grid-template-columns: auto 150px 1px;
   align-items: center;
   width: 100%;
 }
@@ -154,10 +156,11 @@ input[type="checkbox"] {
 }
 
 .ticket-row input[type="number"] {
+  border-color: #fefefe;
   justify-self: end;
-  width: clamp(50px, 10vw, 80px);
+  width: clamp(100px, 10vw, 80px);
   font-size: clamp(12px, 2vw, 16px);
-  margin: 0;
+  margin: 10;
 }
 
 /* Status et erreurs */
@@ -385,16 +388,7 @@ input[type="checkbox"] {
   z-index: 1000;
 }
 
-/* Bouton logout */
-#logoutButton {
-  background: #f44336;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 3px;
-  cursor: pointer;
-  margin-left: 10px;
-}
+
 
 /* Info utilisateur et bouton options */
 #userInfo {
@@ -415,116 +409,97 @@ input[type="checkbox"] {
   margin-right: 10px;
 }
 
-.options-button {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
-  font-size: 24px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+/* Style de base pour l'image */
+.banner-image.options-button {
+  width: 100%; /* Taille initiale */
+  height: auto;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
+  transition: transform 0.2s ease; /* Animation fluide */
+  display: block; /* Important pour que la taille soit respectée */
 }
 
-.options-button:hover {
-  background: rgba(255, 255, 255, 0.3);
+/* Effet au survol (ordinateur) */
+.banner-image.options-button:hover {
+  transform: scale(0.95);
 }
 
+/* Style pour le menu déroulant */
 .options-dropdown {
-  position: absolute;
-  right: 0;
-  top: 100%;
-  background: #000;
-  border: 1px solid #fff;
-  border-radius: 5px;
   display: none;
-  min-width: 180px;
-  z-index: 20;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  margin-top: 5px;
+  position: absolute;
+  background-color: #e1d7d7;
+  width: 160px;  
+  z-index: 1;
+  right: 394px;
+  top:12px; /* Ajuste selon la hauteur de ton image */
+  border-radius: 4px;
+  overflow: hidden;
+}
+  
+.options-dropdown button {
+  width: 100%;
+  padding: 12px 16px;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
 }
 
+.options-dropdown button:hover {
+  background-color: #ddd;
+}
+
+/* Afficher le menu déroulant quand il est actif */
 .options-dropdown.show {
   display: block;
 }
 
-.options-dropdown button {
-  background: transparent;
-  border: none;
-  color: white;
-  padding: 10px 15px;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  font-size: 14px;
-  border-bottom: 1px solid #333;
-}
-
-.options-dropdown button:last-child {
-  border-bottom: none;
-}
-
-.options-dropdown button:hover {
-  background: #333;
-}
-
-/* Formulaire changement mot de passe */
-#changePasswordForm {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.9);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1001;
-}
-
-#changePasswordForm .cadre {
-  width: 90%;
-  max-width: 350px;
-  background: #5ebec9;
-  padding: 20px;
-  border-radius: 12px;
+/* Style spécifique pour chaque bouton */
+#editProfileOption {
   border: 1px solid #ffffff;
+  background-color: #2196F3; /* Bleu */
+  border-radius: 12px;
+  color: white; /* Texte blanc */
+  text-align:center;
+  padding: 10px;
 }
 
-#changePasswordForm .container {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+#logoutButton {
+  border: 1px solid #ffffff;
+  background-color: #f44336; /* Rouge */
+  border-radius: 12px;
+  color: white; /* Texte blanc */
+  text-align:center;
+  padding: 10px;
 }
 
-.password-buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
+/* Effet au survol */
+#editProfileOption:hover {
+  background-color: #0b7dda; /* Bleu plus foncé */
 }
 
-.password-buttons button {
-  flex: 1;
-  padding: 8px;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-  font-weight: bold;
+#logoutButton:hover {
+  background-color: #d32f2f; /* Rouge plus foncé */
+}
+/* Media query pour les téléphones (écrans ≤ 480px) */
+@media (max-width: 480px) {
+  .options-dropdown {
+    width: 50%; /* Pleine largeur */
+    right: 185px;
+    
+    top: 13px; /* Ajuste selon la hauteur de ton image */
+    max-width: none; /* Annule la largeur fixe */
+  }
+
+  /* Optionnel : ajuster la taille des boutons sur mobile */
+  .options-dropdown button {
+    padding: 10px;
+    font-size: 14px;
+  }
 }
 
-#confirmChangePasswordButton {
-  background: #4CAF50;
-  color: white;
-}
 
-#cancelChangePasswordButton {
-  background: #f44336;
-  color: white;
-}
+
 
 /* Se rappeler de moi */
 .remember-me-container {
@@ -545,4 +520,97 @@ input[type="checkbox"] {
   color: white;
   user-select: none;
   cursor: pointer;
+}
+/* Style pour le formulaire de modification de profil */
+
+/* Assure que la modale est cachée au démarrage */
+#editProfileForm {
+  display: none; /* <-- C'est la ligne cruciale qui manquait */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  justify-content: center;
+  align-items: center;
+  z-index: 1001;
+}
+
+
+#editProfileForm .cadre {
+  width: 90%;
+  max-width: 400px;
+  background: #5ebec9;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #ffffff;
+}
+
+#editProfileForm .container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#editProfileForm label {
+  border: 1px solid #ffffff;
+  background: #e91e63;
+  padding: 5px;
+  border-radius: 3px;
+  font-weight: bold;
+  text-align: center;
+  color: white;
+}
+
+#editProfileForm input,
+#editProfileForm select {
+  border: 1px solid #ffffff;
+  background: #b2ebf2;
+  padding: 8px;
+  border-radius: 3px;
+  text-align: center;
+}
+
+#editProfileError {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.password-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.password-buttons button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#confirmEditProfileButton {
+  background: #4CAF50;
+  color: white;
+}
+
+#cancelEditProfileButton {
+  background: #f44336;
+  color: white;
+}
+
+/* Adaptation pour mobile */
+@media (max-width: 480px) {
+  #editProfileForm .cadre {
+    width: 95%;
+    padding: 15px;
+  }
+
+  #editProfileForm input,
+  #editProfileForm select {
+    font-size: 14px;
+  }
 }

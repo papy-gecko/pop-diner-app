@@ -33,15 +33,20 @@
       <div class="user-info-container">
         <div id="userInfo">
          
-          <button class="options-button" id="optionsToggle">⋮</button>
-          <div class="options-dropdown" id="optionsDropdown">
-            <button id="changePasswordButton">Modifier mot de passe</button>
-            <button id="logoutButton">Déconnexion</button>
-          </div>
-        </div>
+          
 
       <div class="container">
-        <img src="https://i.postimg.cc/sgJn040S/SGS25NG.png" alt="Bannière" class="banner-image">
+ <img
+  src="https://i.postimg.cc/sgJn040S/SGS25NG.png"
+  alt="Menu Options"
+  class="banner-image options-button"
+  id="optionsToggle"
+>
+  <!-- Menu déroulant avec les options -->
+  <div class="options-dropdown" id="optionsDropdown">
+  <button id="editProfileOption" class="dropdown-option">Modifier mon profil</button>
+  <button id="logoutButton" class="dropdown-option">Déconnexion</button>
+  </div>
         <!-- Date et semaine -->
         <label>Date du jour</label>
         <input type="text" id="dateJour" readonly>
@@ -114,22 +119,39 @@
     </div>
   </div>
 
-  <!-- Formulaire changement mot de passe -->
-  <div id="changePasswordForm">
-    <div class="cadre">
-      <div class="container">
-        <h3>Changer le mot de passe</h3>
-        <input type="password" id="currentPasswordInput" placeholder="Mot de passe actuel">
-        <input type="password" id="newPasswordInput" placeholder="Nouveau mot de passe">
-        <input type="password" id="confirmNewPasswordInput" placeholder="Confirmer nouveau mot de passe">
-        <div class="password-buttons">
-          <button id="confirmChangePasswordButton">Valider</button>
-          <button id="cancelChangePasswordButton">Annuler</button>
-        </div>
-        <p id="changePasswordError" class="error"></p>
+<!-- Formulaire de modification de profil (modal séparé) -->
+<div id="editProfileForm" class="modal">
+  <div class="cadre">
+    <h2>Modifier mon profil</h2>
+    <div id="editProfileError" class="status error"></div>
+    <div class="container">
+      <label for="newUsername">Identifiant</label>
+      <input type="text" id="newUsername" placeholder="Nouvel identifiant" required>
+
+      <label for="currentPassword">Mot de passe actuel</label>
+      <input type="password" id="currentPassword" placeholder="Mot de passe actuel" required>
+
+      <label for="newPassword">Nouveau mot de passe (optionnel)</label>
+      <input type="password" id="newPassword" placeholder="Laisser vide pour ne pas changer">
+
+      <label for="secretQuestion">Question secrète</label>
+      <select id="secretQuestion">
+        <option value="">-- Sélectionnez une question --</option>
+        <option value="Quel est le nom de votre premier animal de compagnie ?">Quel est le nom de votre premier animal de compagnie ?</option>
+        <option value="Dans quelle ville êtes-vous né(e) ?">Dans quelle ville êtes-vous né(e) ?</option>
+        <option value="Quel était le nom de votre professeur préféré ?">Quel était le nom de votre professeur préféré ?</option>
+      </select>
+
+      <label for="secretAnswer">Réponse secrète</label>
+      <input type="text" id="secretAnswer" placeholder="Votre réponse secrète">
+
+      <div class="password-buttons">
+        <button id="confirmEditProfileButton">Enregistrer</button>
+        <button id="cancelEditProfileButton">Annuler</button>
       </div>
     </div>
   </div>
+</div>
 
   <script src="script.js"></script>
 </body>

@@ -1,15 +1,14 @@
-
 const webAppUrl = "https://script.google.com/macros/s/AKfycbx-KLhig1l6aLqe148kmCOr0jzCjf0lCNk_pidvEBtSuuRyMOzmHeXTji3PUWIbdWJo1Q/exec";
 
-// Variables globales
+// Variables globales (toutes en let pour permettre les modifications)
 let ticketUnitValue = 8;
 let isMenuStandard = false;
 let currentMenuPrice = 0;
 let currentMenuCost = 0;
 let allData = {};
 let selectedClient = "";
-let currentUser = null;
-let currentPassword = "";
+let currentUser = null;  // let au lieu de const
+let currentPassword = ""; // let au lieu de const
 
 // Affiche un message de statut
 function setStatus(message, isError = false, elementId = 'status') {
@@ -27,20 +26,15 @@ async function fetchData(action, params = {}, method = "GET", data = null) {
     for (const [key, value] of Object.entries(params)) {
       url += `&${key}=${encodeURIComponent(value)}`;
     }
-
     const options = { method };
     if (data) {
       options.headers = { "Content-Type": "application/json" };
       options.body = JSON.stringify(data);
     }
-
     const response = await fetch(url, options);
-
-    // Pour les requêtes POST en mode no-cors
     if (method === "POST") {
       return { success: true };
     }
-
     try {
       return await response.json();
     } catch (e) {
@@ -60,34 +54,41 @@ async function fetchData(action, params = {}, method = "GET", data = null) {
 async function login() {
   const username = document.getElementById('loginUsername').value;
   const password = document.getElementById('loginPassword').value;
+  const rememberMe = document.getElementById('rememberMe').checked;
+
   if (!username || !password) {
     setStatus("Veuillez remplir tous les champs.", true, 'loginError');
     return false;
   }
-  
+
+  if (rememberMe) {
+    localStorage.setItem('rememberedUsername', username);
+    localStorage.setItem('rememberMe', 'true');
+  } else {
+    localStorage.removeItem('rememberedUsername');
+    localStorage.removeItem('rememberMe');
+  }
+
   currentPassword = password;
   const result = await fetchData("verifyUser", { username, password });
+
   if (result?.success) {
     currentUser = {
       username,
       role: result.role || "employe",
-      employe: result.employe || username // Utilisez l'employé lié ou le username par défaut
+      employe: result.employe || username
     };
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('appContainer').style.display = 'block';
-    
-    
-    document.getElementById('employe').value = result.employe || username; // Remplit le champ employé
-    document.getElementById('userInfo').style.display = 'block';
+    document.getElementById('employe').value = result.employe || username;
+    document.getElementById('userInfo').style.display = 'flex';
     await loadAllData();
-    
     return true;
   } else {
     setStatus(result?.error || "Identifiants incorrects.", true, 'loginError');
     return false;
   }
 }
-
 
 // Déconnexion
 function logout() {
@@ -97,7 +98,6 @@ function logout() {
   document.getElementById('loginForm').style.display = 'flex';
   document.getElementById('loginUsername').value = '';
   document.getElementById('loginPassword').value = '';
-  
 }
 
 // Calcule le numéro de la semaine
@@ -132,7 +132,6 @@ function updateQuantityIfEmpty(selectElement) {
 function syncQuantities() {
   const platQuantityInput = document.querySelector('.product-quantity[data-position="1"]');
   const quantity = parseInt(platQuantityInput.value) || 0;
-
   document.querySelectorAll('.product-quantity[data-position="2"], .product-quantity[data-position="3"]').forEach(input => {
     const selectElement = document.querySelector(`.product-select[data-position="${input.dataset.position}"]`);
     if (selectElement.value !== "") {
@@ -141,7 +140,6 @@ function syncQuantities() {
       input.value = 0;
     }
   });
-
   const boissonSelect = document.querySelector('.product-select[data-position="4"]');
   const boissonQuantityInput = document.querySelector('.product-quantity[data-position="4"]');
   if (boissonSelect.disabled || boissonSelect.value === "") {
@@ -149,7 +147,6 @@ function syncQuantities() {
   } else {
     boissonQuantityInput.value = quantity;
   }
-
   const optionnelSelect = document.querySelector('.product-select[data-position="5"]');
   const optionnelQuantityInput = document.querySelector('.product-quantity[data-position="5"]');
   if (optionnelSelect.value === "") {
@@ -157,7 +154,6 @@ function syncQuantities() {
   } else {
     optionnelQuantityInput.value = quantity;
   }
-
   calculerTotaux();
 }
 
@@ -173,14 +169,12 @@ function fillSelect(selectElement, options, valueKey = null, textKey = null, dat
     option.textContent = "-";
     selectElement.appendChild(option);
   }
-
   if (selectElement.id === "noms_des_client") {
     const nouveauOption = document.createElement('option');
     nouveauOption.value = "nouveau";
     nouveauOption.textContent = "+ Nouveau client...";
     selectElement.appendChild(nouveauOption);
   }
-
   options.forEach(option => {
     const optElement = document.createElement('option');
     optElement.value = valueKey ? option[valueKey] : option;
@@ -194,17 +188,10 @@ function fillSelect(selectElement, options, valueKey = null, textKey = null, dat
 
 // Charge toutes les données
 async function loadAllData() {
-  
   const result = await fetchData("getAllData");
-
- 
-
   allData = result;
-
-
   fillSelect(document.getElementById('contrat_entreprise'), allData.contrats);
   fillSelect(document.getElementById('noms_des_client'), allData.clients);
-
   const menuSelect = document.getElementById('menu');
   menuSelect.innerHTML = '<option value="sans menu">sans menu</option>';
   allData.menus.forEach(menu => {
@@ -213,13 +200,10 @@ async function loadAllData() {
     option.textContent = menu;
     menuSelect.appendChild(option);
   });
-
   document.querySelectorAll('.product-select').forEach(select => {
     fillSelect(select, allData.allProducts, 'name', 'name', { price: 'price', cost: 'cost', type: 'type' });
   });
-
   ticketUnitValue = allData.ticketValue || 8;
-  
 }
 
 // Active le mode libre
@@ -227,20 +211,16 @@ function unlockProductSelections() {
   isMenuStandard = false;
   currentMenuPrice = 0;
   currentMenuCost = 0;
-
   document.querySelectorAll('.product-select').forEach(select => {
     select.disabled = false;
     select.value = "";
   });
-
   document.querySelectorAll('.product-quantity').forEach(input => {
     input.value = 0;
   });
-
   document.querySelectorAll('.product-select').forEach(select => {
     fillSelect(select, allData.allProducts, 'name', 'name', { price: 'price', cost: 'cost', type: 'type' });
   });
-
   setStatus("Mode libre : sélectionnez vos produits.");
 }
 
@@ -248,20 +228,16 @@ function unlockProductSelections() {
 async function loadMenuProducts(menuName) {
   setStatus(`Chargement du menu "${menuName}"...`);
   const menuDetails = allData.menusWithDetails.find(m => m.name === menuName);
-
   if (!menuDetails) {
     setStatus(`Menu "${menuName}" non trouvé.`, true);
     return;
   }
-
   currentMenuPrice = menuDetails.price;
   currentMenuCost = menuDetails.cost;
   isMenuStandard = true;
-
   document.querySelectorAll('.product-select[data-position="1"], .product-select[data-position="2"], .product-select[data-position="3"]').forEach(select => {
     select.disabled = true;
   });
-
   const boissonSelect = document.querySelector('.product-select[data-position="4"]');
   if (menuName.includes("S-B")) {
     boissonSelect.disabled = true;
@@ -270,13 +246,11 @@ async function loadMenuProducts(menuName) {
     boissonSelect.disabled = false;
     fillSelect(boissonSelect, allData.boissons, 'name', 'name', { price: 'price', cost: 'cost', type: 'type' });
   }
-
   document.querySelector('.product-select[data-position="1"]').value = menuDetails.plat || "";
   document.querySelector('.product-select[data-position="2"]').value = menuDetails.accompagnement || "";
   document.querySelector('.product-select[data-position="3"]').value = menuDetails.dessert || "";
   document.querySelector('.product-select[data-position="4"]').value = menuDetails.boisson || "";
   document.querySelector('.product-select[data-position="5"]').value = "";
-
   document.querySelector('.product-quantity[data-position="1"]').value = 0;
   syncQuantities();
   setStatus(`Menu "${menuName}" chargé.`);
@@ -286,20 +260,17 @@ async function loadMenuProducts(menuName) {
 async function handleMenuSelection() {
   const menuSelect = document.getElementById('menu');
   const selectedMenu = menuSelect.value;
-
   if (selectedMenu === "sans menu") {
     unlockProductSelections();
   } else {
     await loadMenuProducts(selectedMenu);
   }
-
   calculerTotaux();
 }
 
 // Calcule les totaux
 function calculerTotaux() {
   let coutGlobal = 0, prixGlobal = 0;
-
   if (isMenuStandard) {
     const quantity = parseInt(document.querySelector('.product-quantity[data-position="1"]').value) || 1;
     prixGlobal = currentMenuPrice * quantity;
@@ -312,20 +283,17 @@ function calculerTotaux() {
       const quantite = parseInt(input.value) || 0;
       const price = parseFloat(option.dataset.price) || 0;
       const cost = parseFloat(option.dataset.cost) || 0;
-
       if (select.value !== "") {
         coutGlobal += cost * quantite;
         prixGlobal += price * quantite;
       }
     });
   }
-
   const useTicket = document.getElementById('ticket').checked;
   const ticketNombre = useTicket ? parseInt(document.getElementById('ticketNombre').value) || 0 : 0;
   const ticketMontant = useTicket ? ticketNombre * ticketUnitValue : 0;
   const prixFinal = Math.max(0, prixGlobal - ticketMontant);
   const benefice = (prixFinal - coutGlobal) + ticketMontant;
-
   document.getElementById('coutGlobalMatierePremiere').value = `${coutGlobal.toFixed(2)} €`;
   document.getElementById('PrixAFairePayer').value = `${prixFinal.toFixed(2)} €`;
   document.getElementById('benefice').value = `${benefice.toFixed(2)} €`;
@@ -335,14 +303,11 @@ function calculerTotaux() {
 async function ajouterNouveauClient() {
   const nouveauClientInput = document.getElementById('nouveauClientInput');
   const nouveauClient = nouveauClientInput.value.trim();
-
   if (!nouveauClient) {
     setStatus("Veuillez entrer un nom de client.", true);
     return;
   }
-
   setStatus(`Ajout du client "${nouveauClient}"...`);
-
   try {
     await fetch(webAppUrl, {
       method: "POST",
@@ -353,7 +318,6 @@ async function ajouterNouveauClient() {
         nomClient: nouveauClient
       })
     });
-
     await loadAllData();
     document.getElementById('noms_des_client').value = nouveauClient;
     selectedClient = nouveauClient;
@@ -381,14 +345,12 @@ async function enregistrerCommande() {
     setStatus("Veuillez sélectionner un employé.", true);
     return;
   }
-
   if (clientSelect.value === "nouveau" && !client) {
     setStatus("Veuillez entrer un nom de client.", true);
     return;
   }
 
   let data;
-
   if (isMenuStandard) {
     data = {
       action: "enregistrerCommande",
@@ -407,11 +369,9 @@ async function enregistrerCommande() {
     };
   } else {
     const products = [];
-
     document.querySelectorAll('.product-select').forEach(select => {
       const position = select.dataset.position;
       const input = document.querySelector(`.product-quantity[data-position="${position}"]`);
-
       if (select.value !== "" && parseInt(input.value) > 0) {
         products.push({
           nom: select.value,
@@ -422,12 +382,10 @@ async function enregistrerCommande() {
         });
       }
     });
-
     if (products.length === 0) {
       setStatus("Veuillez sélectionner au moins un produit.", true);
       return;
     }
-
     data = {
       action: "enregistrerCommande",
       typeCommande: "libre",
@@ -438,7 +396,6 @@ async function enregistrerCommande() {
   }
 
   setStatus("Enregistrement en cours...");
-
   try {
     await fetch(webAppUrl, {
       method: "POST",
@@ -446,7 +403,6 @@ async function enregistrerCommande() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
-
     setStatus("Commande enregistrée avec succès !");
     document.getElementById('menu').value = "sans menu";
     unlockProductSelections();
@@ -456,10 +412,18 @@ async function enregistrerCommande() {
   }
 }
 
-// Initialisation
+// Initialisation et écouteurs d'événements
 document.addEventListener('DOMContentLoaded', () => {
   // Cache le contenu principal au démarrage
   document.getElementById('appContainer').style.display = 'none';
+
+  // Vérification de "Se rappeler de moi"
+  const rememberedUsername = localStorage.getItem('rememberedUsername');
+  const rememberMeChecked = localStorage.getItem('rememberMe') === 'true';
+  if (rememberedUsername && rememberMeChecked) {
+    document.getElementById('loginUsername').value = rememberedUsername;
+    document.getElementById('rememberMe').checked = true;
+  }
 
   // Écouteurs pour le formulaire de login
   document.getElementById('loginButton').addEventListener('click', login);
@@ -467,7 +431,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Écouteurs pour le formulaire principal
   document.getElementById('menu').addEventListener('change', handleMenuSelection);
-
   document.querySelectorAll('.product-select').forEach(select => {
     select.addEventListener('change', () => {
       updateQuantityIfEmpty(select);
@@ -475,22 +438,18 @@ document.addEventListener('DOMContentLoaded', () => {
       else calculerTotaux();
     });
   });
-
   document.querySelectorAll('.product-quantity').forEach(input => {
     input.addEventListener('input', () => {
       if (input.dataset.position === "1") syncQuantities();
       else calculerTotaux();
     });
   });
-
   document.getElementById('ticket').addEventListener('change', function() {
     document.getElementById('ticketNombre').disabled = !this.checked;
     document.getElementById('ticketNombre').value = this.checked ? 1 : 0;
     calculerTotaux();
   });
-
   document.getElementById('ticketNombre').addEventListener('input', calculerTotaux);
-
   document.getElementById('noms_des_client').addEventListener('change', function() {
     if (this.value === "nouveau") {
       document.getElementById('nouveauClientContainer').style.display = 'block';
@@ -500,176 +459,159 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedClient = this.value;
     }
   });
-
   document.getElementById('validerNouveauClient').addEventListener('click', ajouterNouveauClient);
   document.getElementById('enregistrer').addEventListener('click', enregistrerCommande);
 
-  // Initialise la date et charge les données
-  updateDateInfo();
-  loadAllData();
-});
-// Gestion du menu options
-document.addEventListener('DOMContentLoaded', function() {
-  // Vérification de "Se rappeler de moi"
-  const rememberedUsername = localStorage.getItem('rememberedUsername');
-  const rememberMeChecked = localStorage.getItem('rememberMe') === 'true';
-
-  if (rememberedUsername && rememberMeChecked) {
-    document.getElementById('loginUsername').value = rememberedUsername;
-    document.getElementById('rememberMe').checked = true;
-  }
-
-  // Menu options
+  // Gestion du menu options et du formulaire de profil
   const optionsToggle = document.getElementById('optionsToggle');
   const optionsDropdown = document.getElementById('optionsDropdown');
+  const editProfileOption = document.getElementById('editProfileOption');
+  const editProfileForm = document.getElementById('editProfileForm');
+  const cancelEditProfileButton = document.getElementById('cancelEditProfileButton');
+  const confirmEditProfileButton = document.getElementById('confirmEditProfileButton');
 
+  // Effet au toucher pour mobile sur l'image
+  if (optionsToggle) {
+    optionsToggle.addEventListener('touchstart', function() {
+      this.style.transform = 'scale(0.95)';
+    });
+    optionsToggle.addEventListener('touchend', function() {
+      this.style.transform = 'scale(1)';
+    });
+  }
+
+  // Gestion du menu déroulant
   if (optionsToggle && optionsDropdown) {
     optionsToggle.addEventListener('click', function(e) {
       e.stopPropagation();
       optionsDropdown.classList.toggle('show');
     });
 
-    // Fermer le menu quand on clique ailleurs
     document.addEventListener('click', function() {
       optionsDropdown.classList.remove('show');
     });
 
-    // Empêcher la fermeture quand on clique dans le menu
     optionsDropdown.addEventListener('click', function(e) {
       e.stopPropagation();
     });
   }
 
-  // Gestion du changement de mot de passe
-  const changePasswordButton = document.getElementById('changePasswordButton');
-  const changePasswordForm = document.getElementById('changePasswordForm');
-  const cancelChangePasswordButton = document.getElementById('cancelChangePasswordButton');
+  // Ouvre le formulaire de profil quand on clique sur "Modifier mon profil"
+  if (editProfileOption && editProfileForm) {
+    editProfileOption.addEventListener('click', function(e) {
+      e.stopPropagation();
+      optionsDropdown.classList.remove('show');
+      editProfileForm.style.display = 'flex';
 
-  if (changePasswordButton && changePasswordForm && cancelChangePasswordButton) {
-    changePasswordButton.addEventListener('click', function() {
-      changePasswordForm.style.display = 'flex';
-    });
+      // Préremplit le formulaire
+      document.getElementById('newUsername').value = currentUser.username;
+      document.getElementById('currentPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      setStatus('', false, 'editProfileError');
 
-    cancelChangePasswordButton.addEventListener('click', function() {
-      changePasswordForm.style.display = 'none';
-      document.getElementById('changePasswordError').textContent = '';
-      document.getElementById('currentPasswordInput').value = '';
-      document.getElementById('newPasswordInput').value = '';
-      document.getElementById('confirmNewPasswordInput').value = '';
+      // Charge la question secrète actuelle
+      fetchData("getUserDetails", { username: currentUser.username })
+        .then(userDetails => {
+          if (userDetails.success && userDetails.secret_question) {
+            document.getElementById('secretQuestion').value = userDetails.secret_question;
+            if (userDetails.secret_answer) {
+              document.getElementById('secretAnswer').placeholder = "Réponse actuelle: ******";
+            }
+          }
+        });
     });
   }
 
-  // Validation du changement de mot de passe
-  const confirmChangePasswordButton = document.getElementById('confirmChangePasswordButton');
-  if (confirmChangePasswordButton) {
-    confirmChangePasswordButton.addEventListener('click', async function() {
-      const currentPassword = document.getElementById('currentPasswordInput').value;
-      const newPassword = document.getElementById('newPasswordInput').value;
-      const confirmNewPassword = document.getElementById('confirmNewPasswordInput').value;
-      const errorElement = document.getElementById('changePasswordError');
+  // Ferme le formulaire de profil
+  if (cancelEditProfileButton && editProfileForm) {
+    cancelEditProfileButton.addEventListener('click', function() {
+      editProfileForm.style.display = 'none';
+    });
+  }
+
+  // Ferme le formulaire si on clique en dehors
+  if (editProfileForm) {
+    editProfileForm.addEventListener('click', function(e) {
+      if (e.target === this) this.style.display = 'none';
+    });
+  }
+
+  // Validation du formulaire de modification de profil
+  if (confirmEditProfileButton) {
+    confirmEditProfileButton.addEventListener('click', async function() {
+      let newUsername = document.getElementById('newUsername').value.trim();
+      let currentPassword = document.getElementById('currentPassword').value;
+      let newPassword = document.getElementById('newPassword').value;
+      let secretQuestion = document.getElementById('secretQuestion').value;
+      let secretAnswer = document.getElementById('secretAnswer').value.trim();
 
       // Validation des champs
-      if (!currentPassword || !newPassword || !confirmNewPassword) {
-        errorElement.textContent = "Tous les champs sont obligatoires";
+      if (!currentPassword) {
+        setStatus("Veuillez entrer votre mot de passe actuel.", true, 'editProfileError');
         return;
       }
 
-      if (newPassword !== confirmNewPassword) {
-        errorElement.textContent = "Les nouveaux mots de passe ne correspondent pas";
+      if (newUsername.length < 3) {
+        setStatus("L'identifiant doit faire au moins 3 caractères.", true, 'editProfileError');
         return;
       }
 
-      if (newPassword.length < 6) {
-        errorElement.textContent = "Le mot de passe doit contenir au moins 6 caractères";
+      if (newPassword && newPassword.length < 6) {
+        setStatus("Le mot de passe doit faire au moins 6 caractères.", true, 'editProfileError');
         return;
       }
 
-      // Appel à l'API pour changer le mot de passe
-      try {
-        const response = await fetch(webAppUrl, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            action: "changePassword",
-            username: currentUser.username,
-            currentPassword: currentPassword,
-            newPassword: newPassword
-          })
-        });
-
-        // Vérification basique de la réponse
-        changePasswordForm.style.display = 'none';
-        errorElement.textContent = '';
-        document.getElementById('currentPasswordInput').value = '';
-        document.getElementById('newPasswordInput').value = '';
-        document.getElementById('confirmNewPasswordInput').value = '';
-
-        // Message de succès
-        setStatus("Mot de passe changé avec succès !", false);
-
-      } catch (error) {
-        errorElement.textContent = "Erreur lors du changement de mot de passe: " + error.message;
+      if (secretQuestion && !secretAnswer) {
+        setStatus("Veuillez entrer une réponse à votre question secrète.", true, 'editProfileError');
+        return;
       }
-    });
-  }
 
-  // Gestion de la déconnexion
-  const logoutButton = document.getElementById('logoutButton');
-  if (logoutButton) {
-    logoutButton.addEventListener('click', function() {
-      logout();
-    });
-  }
-});
+      // Envoi des données au serveur
+ try {
+  await fetch(webAppUrl, {
+    method: "POST",
+    mode: "no-cors", // en no-cors tu n'auras AUCUNE réponse exploitable
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "editProfile",
+      username: currentUser.username,
+      currentPassword: currentPassword,
+      newUsername: newUsername,
+      newPassword: newPassword,
+      secretQuestion: secretQuestion,
+      secretAnswer: secretAnswer
+    })
+  });
 
-// Fonction de déconnexion existante (à garder)
-function logout() {
-  currentUser = null;
-  currentPassword = "";
-  document.getElementById('appContainer').style.display = 'none';
-  document.getElementById('loginForm').style.display = 'flex';
-  document.getElementById('loginUsername').value = '';
-  document.getElementById('loginPassword').value = '';
-}
+  // Ici on suppose que si la requête passe sans erreur => succès
+  setStatus("Profil mis à jour avec succès !", false, 'editProfileError');
 
-// Fonction de connexion modifiée pour gérer "Se rappeler de moi"
-async function login() {
-  const username = document.getElementById('loginUsername').value;
-  const password = document.getElementById('loginPassword').value;
-  const rememberMe = document.getElementById('rememberMe').checked;
-
-  if (!username || !password) {
-    setStatus("Veuillez remplir tous les champs.", true, 'loginError');
-    return false;
-  }
-
-  // Sauvegarde le nom d'utilisateur si "Se rappeler de moi" est coché
-  if (rememberMe) {
-    localStorage.setItem('rememberedUsername', username);
-    localStorage.setItem('rememberMe', 'true');
-  } else {
-    localStorage.removeItem('rememberedUsername');
-    localStorage.removeItem('rememberMe');
-  }
-
-  currentPassword = password;
-  const result = await fetchData("verifyUser", { username, password });
-
-  if (result?.success) {
+  // Met à jour l'utilisateur actuel si l'identifiant a changé
+  if (newUsername !== currentUser.username) {
     currentUser = {
-      username,
-      role: result.role || "employe",
-      employe: result.employe || username
+      ...currentUser,
+      username: newUsername
     };
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'block';
-    document.getElementById('employe').value = result.employe || username;
-    document.getElementById('userInfo').style.display = 'flex';
-    await loadAllData();
-    return true;
-  } else {
-    setStatus(result?.error || "Identifiants incorrects.", true, 'loginError');
-    return false;
+    document.getElementById('employe').value = newUsername;
   }
+
+  // Met à jour le mot de passe en mémoire si changé
+  if (newPassword) {
+    currentPassword = newPassword;
+  }
+
+  // Ferme le formulaire et recharge les données
+  editProfileForm.style.display = 'none';
+  await loadAllData();
+
+} catch (error) {
+  setStatus(`Erreur: ${error.message}`, true, 'editProfileError');
 }
+
+    });
+  }
+
+  // Initialise la date et charge les données
+  updateDateInfo();
+  loadAllData();
+});
