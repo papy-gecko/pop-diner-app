@@ -1,5 +1,4 @@
 const webAppUrl = "https://script.google.com/macros/s/AKfycbx-KLhig1l6aLqe148kmCOr0jzCjf0lCNk_pidvEBtSuuRyMOzmHeXTji3PUWIbdWJo1Q/exec";
-
 // Variables globales (toutes en let pour permettre les modifications)
 let ticketUnitValue = 8;
 let isMenuStandard = false;
@@ -10,6 +9,44 @@ let selectedClient = "";
 let currentUser = null;  // let au lieu de const
 let currentPassword = ""; // let au lieu de const
 
+// =============================
+// NOUVELLE FONCTION : Vérifie si l'utilisateur est resté connecté
+// =============================
+function isUserLoggedIn() {
+  return localStorage.getItem("stayConnected") === "true" &&
+         localStorage.getItem("username") !== null &&
+         localStorage.getItem("password") !== null;
+}
+
+// =============================
+// NOUVELLE FONCTION : Connexion automatique depuis le localStorage
+// =============================
+async function autoLoginFromStorage() {
+  const savedUsername = localStorage.getItem("username");
+  const savedPassword = localStorage.getItem("password");
+
+  if (!savedUsername || !savedPassword) return false;
+
+  const result = await fetchData("verifyUser", { username: savedUsername, password: savedPassword });
+
+  if (result?.success) {
+    currentUser = {
+      username: savedUsername,
+      role: result.role || "employe",
+      employe: result.employe || savedUsername
+    };
+    currentPassword = savedPassword;
+
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'block';
+    document.getElementById('employe').value = result.employe || savedUsername;
+    document.getElementById('userInfo').style.display = 'flex';
+    await loadAllData();
+    return true;
+  }
+  return false;
+}
+
 // Affiche un message de statut
 function setStatus(message, isError = false, elementId = 'status') {
   const statusElement = document.getElementById(elementId);
@@ -18,7 +55,6 @@ function setStatus(message, isError = false, elementId = 'status') {
     statusElement.className = isError ? 'status error' : 'status';
   }
 }
-
 // Requête vers l'API
 async function fetchData(action, params = {}, method = "GET", data = null) {
   try {
@@ -49,18 +85,15 @@ async function fetchData(action, params = {}, method = "GET", data = null) {
     return { success: false, error: error.message };
   }
 }
-
 // Connexion de l'utilisateur
 async function login() {
-  const username = document.getElementById('loginUsername').value;
+  const username = document.getElementById('loginUsername').value.trim();
   const password = document.getElementById('loginPassword').value;
   const rememberMe = document.getElementById('rememberMe').checked;
-
   if (!username || !password) {
     setStatus("Veuillez remplir tous les champs.", true, 'loginError');
     return false;
   }
-
   if (rememberMe) {
     localStorage.setItem('rememberedUsername', username);
     localStorage.setItem('rememberMe', 'true');
@@ -68,10 +101,8 @@ async function login() {
     localStorage.removeItem('rememberedUsername');
     localStorage.removeItem('rememberMe');
   }
-
   currentPassword = password;
   const result = await fetchData("verifyUser", { username, password });
-
   if (result?.success) {
     currentUser = {
       username,
@@ -83,13 +114,23 @@ async function login() {
     document.getElementById('employe').value = result.employe || username;
     document.getElementById('userInfo').style.display = 'flex';
     await loadAllData();
+    // Gérer stayConnected
+    const stayConnectedChecked = document.getElementById("stayConnected")?.checked;
+    if (stayConnectedChecked) {
+      localStorage.setItem("username", username);
+      localStorage.setItem("password", password);
+      localStorage.setItem("stayConnected", "true");
+    } else {
+      localStorage.removeItem("username");
+      localStorage.removeItem("password");
+      localStorage.setItem("stayConnected", "false");
+    }
     return true;
   } else {
     setStatus(result?.error || "Identifiants incorrects.", true, 'loginError');
     return false;
   }
 }
-
 // Déconnexion
 function logout() {
   currentUser = null;
@@ -98,8 +139,12 @@ function logout() {
   document.getElementById('loginForm').style.display = 'flex';
   document.getElementById('loginUsername').value = '';
   document.getElementById('loginPassword').value = '';
+  document.getElementById('stayConnected').checked = false;
+  // Supprime stayConnected
+  localStorage.removeItem("username");
+  localStorage.removeItem("password");
+  localStorage.setItem("stayConnected", "false");
 }
-
 // Calcule le numéro de la semaine
 function getWeekNumber(d) {
   d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -108,7 +153,6 @@ function getWeekNumber(d) {
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
-
 // Met à jour la date et la semaine
 function updateDateInfo() {
   const today = new Date();
@@ -117,7 +161,6 @@ function updateDateInfo() {
   document.getElementById('jourLettre').value = jours[today.getDay()];
   document.getElementById('numSemaine').value = getWeekNumber(today);
 }
-
 // Met à jour la quantité si un produit est désélectionné
 function updateQuantityIfEmpty(selectElement) {
   const position = selectElement.dataset.position;
@@ -127,7 +170,6 @@ function updateQuantityIfEmpty(selectElement) {
     calculerTotaux();
   }
 }
-
 // Synchronise les quantités
 function syncQuantities() {
   const platQuantityInput = document.querySelector('.product-quantity[data-position="1"]');
@@ -156,7 +198,6 @@ function syncQuantities() {
   }
   calculerTotaux();
 }
-
 // Remplit une liste déroulante
 function fillSelect(selectElement, options, valueKey = null, textKey = null, dataAttributes = {}) {
   const defaultOption = selectElement.querySelector('option[value=""]');
@@ -185,7 +226,6 @@ function fillSelect(selectElement, options, valueKey = null, textKey = null, dat
     selectElement.appendChild(optElement);
   });
 }
-
 // Charge toutes les données
 async function loadAllData() {
   const result = await fetchData("getAllData");
@@ -205,7 +245,6 @@ async function loadAllData() {
   });
   ticketUnitValue = allData.ticketValue || 8;
 }
-
 // Active le mode libre
 function unlockProductSelections() {
   isMenuStandard = false;
@@ -223,7 +262,6 @@ function unlockProductSelections() {
   });
   setStatus("Mode libre : sélectionnez vos produits.");
 }
-
 // Charge les produits d'un menu
 async function loadMenuProducts(menuName) {
   setStatus(`Chargement du menu "${menuName}"...`);
@@ -255,7 +293,6 @@ async function loadMenuProducts(menuName) {
   syncQuantities();
   setStatus(`Menu "${menuName}" chargé.`);
 }
-
 // Gère la sélection d'un menu
 async function handleMenuSelection() {
   const menuSelect = document.getElementById('menu');
@@ -267,7 +304,6 @@ async function handleMenuSelection() {
   }
   calculerTotaux();
 }
-
 // Calcule les totaux
 function calculerTotaux() {
   let coutGlobal = 0, prixGlobal = 0;
@@ -298,7 +334,6 @@ function calculerTotaux() {
   document.getElementById('PrixAFairePayer').value = `${prixFinal.toFixed(2)} €`;
   document.getElementById('benefice').value = `${benefice.toFixed(2)} €`;
 }
-
 // Ajoute un nouveau client
 async function ajouterNouveauClient() {
   const nouveauClientInput = document.getElementById('nouveauClientInput');
@@ -327,7 +362,6 @@ async function ajouterNouveauClient() {
     setStatus(`Erreur lors de l'ajout du client: ${error.message}`, true);
   }
 }
-
 // Envoie la commande à l'API
 async function enregistrerCommande() {
   const dateJour = document.getElementById('dateJour').value;
@@ -340,7 +374,6 @@ async function enregistrerCommande() {
   const menu = document.getElementById('menu').value;
   const hasTicket = document.getElementById('ticket').checked;
   const ticketQty = hasTicket ? parseInt(document.getElementById('ticketNombre').value) || 0 : 0;
-
   if (!employe) {
     setStatus("Veuillez sélectionner un employé.", true);
     return;
@@ -349,7 +382,6 @@ async function enregistrerCommande() {
     setStatus("Veuillez entrer un nom de client.", true);
     return;
   }
-
   let data;
   if (isMenuStandard) {
     data = {
@@ -394,7 +426,6 @@ async function enregistrerCommande() {
       contrat, client, products, hasTicket, ticketQty
     };
   }
-
   setStatus("Enregistrement en cours...");
   try {
     await fetch(webAppUrl, {
@@ -411,11 +442,17 @@ async function enregistrerCommande() {
     setStatus(`Erreur lors de l'enregistrement: ${error.message}`, true);
   }
 }
-
 // Initialisation et écouteurs d'événements
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // Cache le contenu principal au démarrage
   document.getElementById('appContainer').style.display = 'none';
+
+  // =============================
+  // NOUVEAU : Vérifie si l'utilisateur est resté connecté
+  // =============================
+  if (isUserLoggedIn()) {
+    await autoLoginFromStorage();
+  }
 
   // Vérification de "Se rappeler de moi"
   const rememberedUsername = localStorage.getItem('rememberedUsername');
@@ -425,10 +462,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('rememberMe').checked = true;
   }
 
+  // Vérifie si "Rester connecté" était coché
+  const stayConnectedChecked = localStorage.getItem("stayConnected") === "true";
+  if (stayConnectedChecked) {
+    document.getElementById('stayConnected').checked = true;
+  }
+
   // Écouteurs pour le formulaire de login
   document.getElementById('loginButton').addEventListener('click', login);
   document.getElementById('logoutButton').addEventListener('click', logout);
-
   // Écouteurs pour le formulaire principal
   document.getElementById('menu').addEventListener('change', handleMenuSelection);
   document.querySelectorAll('.product-select').forEach(select => {
@@ -462,53 +504,36 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('validerNouveauClient').addEventListener('click', ajouterNouveauClient);
   document.getElementById('enregistrer').addEventListener('click', enregistrerCommande);
 
-  // Gestion du menu options et du formulaire de profil
+  // Écouteurs pour le menu déroulant des options
   const optionsToggle = document.getElementById('optionsToggle');
   const optionsDropdown = document.getElementById('optionsDropdown');
   const editProfileOption = document.getElementById('editProfileOption');
-  const editProfileForm = document.getElementById('editProfileForm');
   const cancelEditProfileButton = document.getElementById('cancelEditProfileButton');
   const confirmEditProfileButton = document.getElementById('confirmEditProfileButton');
 
-  // Effet au toucher pour mobile sur l'image
-  if (optionsToggle) {
-    optionsToggle.addEventListener('touchstart', function() {
-      this.style.transform = 'scale(0.95)';
-    });
-    optionsToggle.addEventListener('touchend', function() {
-      this.style.transform = 'scale(1)';
-    });
-  }
-
-  // Gestion du menu déroulant
   if (optionsToggle && optionsDropdown) {
     optionsToggle.addEventListener('click', function(e) {
       e.stopPropagation();
       optionsDropdown.classList.toggle('show');
     });
-
     document.addEventListener('click', function() {
       optionsDropdown.classList.remove('show');
     });
-
     optionsDropdown.addEventListener('click', function(e) {
       e.stopPropagation();
     });
   }
 
-  // Ouvre le formulaire de profil quand on clique sur "Modifier mon profil"
   if (editProfileOption && editProfileForm) {
     editProfileOption.addEventListener('click', function(e) {
       e.stopPropagation();
       optionsDropdown.classList.remove('show');
-      editProfileForm.style.display = 'flex';
-
+      document.getElementById('editProfileForm').style.display = 'flex';
       // Préremplit le formulaire
       document.getElementById('newUsername').value = currentUser.username;
       document.getElementById('currentPassword').value = '';
       document.getElementById('newPassword').value = '';
       setStatus('', false, 'editProfileError');
-
       // Charge la question secrète actuelle
       fetchData("getUserDetails", { username: currentUser.username })
         .then(userDetails => {
@@ -521,21 +546,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
   }
-
   // Ferme le formulaire de profil
   if (cancelEditProfileButton && editProfileForm) {
     cancelEditProfileButton.addEventListener('click', function() {
       editProfileForm.style.display = 'none';
     });
   }
-
   // Ferme le formulaire si on clique en dehors
   if (editProfileForm) {
     editProfileForm.addEventListener('click', function(e) {
       if (e.target === this) this.style.display = 'none';
     });
   }
-
   // Validation du formulaire de modification de profil
   if (confirmEditProfileButton) {
     confirmEditProfileButton.addEventListener('click', async function() {
@@ -544,33 +566,28 @@ document.addEventListener('DOMContentLoaded', () => {
       let newPassword = document.getElementById('newPassword').value;
       let secretQuestion = document.getElementById('secretQuestion').value;
       let secretAnswer = document.getElementById('secretAnswer').value.trim();
-
       // Validation des champs
       if (!currentPassword) {
         setStatus("Veuillez entrer votre mot de passe actuel.", true, 'editProfileError');
         return;
       }
-
       if (newUsername.length < 3) {
         setStatus("L'identifiant doit faire au moins 3 caractères.", true, 'editProfileError');
         return;
       }
-
       if (newPassword && newPassword.length < 6) {
         setStatus("Le mot de passe doit faire au moins 6 caractères.", true, 'editProfileError');
         return;
       }
-
       if (secretQuestion && !secretAnswer) {
         setStatus("Veuillez entrer une réponse à votre question secrète.", true, 'editProfileError');
         return;
       }
-
       // Envoi des données au serveur
  try {
   await fetch(webAppUrl, {
     method: "POST",
-    mode: "no-cors", // en no-cors tu n'auras AUCUNE réponse exploitable
+    mode: "no-cors",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       action: "editProfile",
@@ -582,10 +599,8 @@ document.addEventListener('DOMContentLoaded', () => {
       secretAnswer: secretAnswer
     })
   });
-
   // Ici on suppose que si la requête passe sans erreur => succès
   setStatus("Profil mis à jour avec succès !", false, 'editProfileError');
-
   // Met à jour l'utilisateur actuel si l'identifiant a changé
   if (newUsername !== currentUser.username) {
     currentUser = {
@@ -594,24 +609,110 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     document.getElementById('employe').value = newUsername;
   }
-
   // Met à jour le mot de passe en mémoire si changé
   if (newPassword) {
     currentPassword = newPassword;
+    // Met à jour le mot de passe dans le localStorage si "Rester connecté" est activé
+    if (localStorage.getItem("stayConnected") === "true") {
+      localStorage.setItem("password", newPassword);
+    }
   }
-
   // Ferme le formulaire et recharge les données
-  editProfileForm.style.display = 'none';
+  document.getElementById('editProfileForm').style.display = 'none';
   await loadAllData();
-
 } catch (error) {
   setStatus(`Erreur: ${error.message}`, true, 'editProfileError');
 }
-
     });
   }
+// ============================================
+// Gestion du "Mot de passe oublié"
+// ============================================
+// Bouton/lien "Mot de passe oublié ?" (dans le login)
+const forgotPasswordLink = document.querySelector(".forgot-password");
+// Formulaire de récupération
+const forgotPasswordForm = document.getElementById("forgotPasswordForm");
+const resetPasswordBtn = document.getElementById("resetPasswordBtn");
+const cancelForgotBtn = document.getElementById("cancelForgotBtn");
+const forgotUsernameInput = document.getElementById("forgotUsername");
+const forgotSecretAnswerInput = document.getElementById("forgotSecretAnswer");
+const forgotNewPasswordInput = document.getElementById("forgotNewPassword");
+const forgotQuestionLabel = document.getElementById("forgotSecretQuestionLabel");
+// Quand on clique sur "Mot de passe oublié ?"
+if (forgotPasswordLink) {
+  forgotPasswordLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("loginForm").style.display = "none";
+    forgotPasswordForm.style.display = "flex";
+    setStatus("", false, "forgotError");
+  });
+}
+// Annuler la récupération → retour au login
+if (cancelForgotBtn) {
+  cancelForgotBtn.addEventListener("click", () => {
+    forgotPasswordForm.style.display = "none";
+    document.getElementById("loginForm").style.display = "flex";
+  });
+}
+// Validation du reset
+if (resetPasswordBtn) {
+  resetPasswordBtn.addEventListener("click", async () => {
+    const username = forgotUsernameInput.value.trim();
+    const secretAnswer = forgotSecretAnswerInput.value.trim();
+    const newPassword = forgotNewPasswordInput.value.trim();
+    // Vérifications basiques
+    if (!username || !secretAnswer || !newPassword) {
+      setStatus("Veuillez remplir tous les champs.", true, "forgotError");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setStatus("Le mot de passe doit faire au moins 6 caractères.", true, "forgotError");
+      return;
+    }
+    // Envoi au serveur
+    try {
+      const response = await fetch(webAppUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "resetPasswordWithSecretAnswer",
+          username: username,
+          answer: secretAnswer,
+          newPassword: newPassword
+        })
+      });
+      setStatus("Mot de passe réinitialisé avec succès !", false, "forgotError");
+      setTimeout(() => {
+        forgotPasswordForm.style.display = "none";
+        document.getElementById("loginForm").style.display = "flex";
+      }, 1500);
+    } catch (error) {
+      setStatus(`Erreur : ${error.message}`, true, "forgotError");
+    }
+  });
+}
+// Affiche la question secrète automatiquement quand l'utilisateur entre son nom
+if (forgotUsernameInput) {
+  forgotUsernameInput.addEventListener("blur", async function() {
+    const username = this.value.trim();
+    if (!username) {
+      forgotQuestionLabel.textContent = "Question secrète :";
+      return;
+    }
+    try {
+      const userDetails = await fetchData("getUserByUsername", { username });
+      if (userDetails.success && userDetails.user && userDetails.user.secret_question) {
+        forgotQuestionLabel.textContent = `Question secrète : ${userDetails.user.secret_question}`;
+      } else {
+        forgotQuestionLabel.textContent = "Question non trouvée";
+      }
+    } catch (error) {
+      forgotQuestionLabel.textContent = "Erreur de récupération";
+    }
+  });
+}
 
-  // Initialise la date et charge les données
-  updateDateInfo();
-  loadAllData();
+// Initialise la date
+updateDateInfo();
 });

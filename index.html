@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>Compta Pop's Diner</title>
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
   <link rel="icon" type="image/png"
   href="pop.png?v=1">
 </head>
@@ -18,14 +18,57 @@
         <input type="text" id="loginUsername" placeholder="Nom d'utilisateur">
         <input type="password" id="loginPassword" placeholder="Mot de passe">
         <div class="remember-me-container">
-          <input type="checkbox" id="rememberMe">
-          <span class="remember-me-label">Se rappeler de moi</span>
-        </div>
+  <div class="checkbox-row">
+    <input type="checkbox" id="rememberMe">
+    <span class="checkbox-text">Se rappeler de moi</span>
+  </div>
+  <div class="checkbox-row">
+    <input type="checkbox" id="stayConnected">
+    <span class="checkbox-text">Rester connecté</span>
+  </div>
+</div>
+
         <button id="loginButton">Se connecter</button>
+        <a href="#" class="forgot-password">Mot de passe oublié ?</a>
         <p id="loginError" class="error"></p>
       </div>
     </div>
   </div>
+
+<!-- ============================= -->
+<!-- Formulaire "Mot de passe oublié" (caché par défaut) -->
+<!-- ============================= -->
+<div id="forgotPasswordForm" class="hidden">
+  <div class="cadre">
+    <div class="container">
+      <!-- Bannière -->
+      <img src="https://i.postimg.cc/sgJn040S/SGS25NG.png" alt="Bannière" class="banner-image">
+
+      <!-- Titre -->
+      <label>Réinitialisation du mot de passe</label>
+
+      <!-- Nom d'utilisateur -->
+      <input type="text" id="forgotUsername" placeholder="Nom d'utilisateur">
+
+      <!-- Question secrète (affichée automatiquement) -->
+      <label for="forgotSecretAnswer" id="forgotSecretQuestionLabel">-</label>
+
+      <!-- Réponse secrète -->
+      <input type="text" id="forgotSecretAnswer" placeholder="Réponse à la question">
+
+      <!-- Nouveau mot de passe -->
+      <input type="password" id="forgotNewPassword" placeholder="Nouveau mot de passe">
+
+      <!-- Boutons -->
+      <button id="resetPasswordBtn">Réinitialiser</button>
+      <button id="cancelForgotBtn">Annuler</button>
+
+      <!-- Message d'erreur / info -->
+      <p id="forgotError" class="error"></p>
+    </div>
+  </div>
+</div>
+
 
   <!-- Conteneur principal -->
   <div id="appContainer" style="display: none;">
@@ -132,7 +175,7 @@
       <input type="password" id="currentPassword" placeholder="Mot de passe actuel" required>
 
       <label for="newPassword">Nouveau mot de passe (optionnel)</label>
-      <input type="password" id="newPassword" placeholder="Laisser vide pour ne pas changer">
+      <input type="password" id="editNewPassword" placeholder="Laisser vide pour ne pas changer">
 
       <label for="secretQuestion">Question secrète</label>
       <select id="secretQuestion">
@@ -143,7 +186,7 @@
       </select>
 
       <label for="secretAnswer">Réponse secrète</label>
-      <input type="text" id="secretAnswer" placeholder="Votre réponse secrète">
+      <input type="text" id="editSecretAnswer" placeholder="Votre réponse secrète">
 
       <div class="password-buttons">
         <button id="confirmEditProfileButton">Enregistrer</button>

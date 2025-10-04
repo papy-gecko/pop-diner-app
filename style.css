@@ -501,26 +501,7 @@ input[type="checkbox"] {
 
 
 
-/* Se rappeler de moi */
-.remember-me-container {
-  align-self: flex-start;
-  display: flex;
-  align-items: center;
-  margin: 5px 0;
-  white-space: nowrap;
-}
 
-#rememberMe {
-  margin-right: 5px;
-  transform: scale(1.2);
-}
-
-.remember-me-label {
-  font-size: 14px;
-  color: white;
-  user-select: none;
-  cursor: pointer;
-}
 /* Style pour le formulaire de modification de profil */
 
 /* Assure que la modale est cachée au démarrage */
@@ -614,3 +595,182 @@ input[type="checkbox"] {
     font-size: 14px;
   }
 }
+/* ============================= */
+/* Formulaire "Mot de passe oublié" */
+/* ============================= */
+
+/* Même style que le loginForm : centré, overlay sombre */
+#forgotPasswordForm {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: none; /* caché par défaut */
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Cadre identique au login */
+#forgotPasswordForm .cadre {
+  width: 90%;
+  max-width: 350px;
+  background: #5ebec9;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #ffffff;
+}
+
+/* Conteneur interne identique */
+#forgotPasswordForm .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #000000;
+  padding: 20px;
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  gap: 10px;
+}
+
+/* Labels */
+#forgotPasswordForm label {
+  border: 1px solid #ffffff;
+  background: #e91e63;
+  padding: 8px;
+  border-radius: 3px;
+  font-weight: bold;
+  color: #fff;
+  font-size: 16px;
+  text-align: center;
+  width: 100%;
+  max-width: 300px;
+  box-sizing: border-box;
+}
+
+/* Inputs */
+#forgotPasswordForm input {
+  border: 1px solid #ffffff;
+  background: #b2ebf2;
+  padding: 10px;
+  border-radius: 3px;
+  text-align: center;
+  font-size: 16px;
+  width: 100%;
+  max-width: 300px;
+  box-sizing: border-box;
+}
+
+/* Boutons */
+#resetPasswordBtn,
+#cancelForgotBtn {
+  background: #fa2759;
+  color: white;
+  border: 1px solid #ffffff;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 5px;
+  width: 100%;
+  max-width: 300px;
+  box-sizing: border-box;
+}
+
+#resetPasswordBtn:hover,
+#cancelForgotBtn:hover {
+  background: #fd5a80;
+}
+
+/* Lien "Mot de passe oublié ?" sous le login */
+.forgot-password {
+  display: block;
+  margin-top: 5px;
+  font-size: 13px;
+  color: #ffffff;
+  text-align: right;
+  text-decoration: none;
+  opacity: 0.8;
+}
+
+.forgot-password:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* Messages d'erreur */
+#forgotPasswordForm .error {
+  color: #f44336 !important;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+/* Adaptation mobile */
+@media (max-width: 480px) {
+  #forgotPasswordForm .cadre {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  #forgotPasswordForm .container {
+    border-radius: 0;
+    padding: 15px;
+    width: 100%;
+    max-width: none;
+  }
+
+  #forgotPasswordForm label,
+  #forgotPasswordForm input,
+  #resetPasswordBtn,
+  #cancelForgotBtn {
+    max-width: none;
+  }
+}
+
+
+.remember-me-container {
+  display: flex;
+  flex-direction: column; /* empile verticalement */
+  gap: 8px;
+  align-items: flex-start; /* aligne à gauche */
+  width: 100%; /* prend toute la largeur du parent */
+}
+
+
+.checkbox-row {
+  display: flex;
+  align-items: center;    /* aligne verticalement case et texte */
+  gap: 8px;               /* espace entre case et texte */
+  justify-content: flex-start; /* aligne à gauche */
+  white-space: nowrap;     /* empêche le texte de revenir à la ligne */
+}
+.checkbox-row input[type="checkbox"] {
+  cursor: pointer; /* curseur “main” au survol */
+}
+
+.checkbox-row span {
+  color: white;
+  font-size: 14px;
+  cursor: pointer;      /* le pointeur devient une main au survol */
+  user-select: none;    /* empêche de sélectionner le texte */
+  pointer-events: none; /* IMPORTANT : le texte ne déclenche pas la checkbox */
+}
+
+  
+  
+
+
+
+
+
+
