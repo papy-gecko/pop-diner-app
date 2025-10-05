@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>Compta Pop's Diner</title>
   <link rel="stylesheet" href="style.css?v=8">
-  <link rel="icon" type="image/png"
-  href="pop.png?v=1">
+  <link rel="icon" type="image/png" href="pop.png?v=1">
 </head>
 <body>
   <!-- Formulaire de login -->
@@ -18,16 +17,15 @@
         <input type="text" id="loginUsername" placeholder="Nom d'utilisateur">
         <input type="password" id="loginPassword" placeholder="Mot de passe">
         <div class="remember-me-container">
-  <div class="checkbox-row">
-    <input type="checkbox" id="rememberMe">
-    <span class="checkbox-text">Se rappeler de moi</span>
-  </div>
-  <div class="checkbox-row">
-    <input type="checkbox" id="stayConnected">
-    <span class="checkbox-text">Rester connecté</span>
-  </div>
-</div>
-
+          <div class="checkbox-row">
+            <input type="checkbox" id="rememberMe">
+            <span class="checkbox-text">Se rappeler de moi</span>
+          </div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="stayConnected">
+            <span class="checkbox-text">Rester connecté</span>
+          </div>
+        </div>
         <button id="loginButton">Se connecter</button>
         <a href="#" class="forgot-password">Mot de passe oublié ?</a>
         <p id="loginError" class="error"></p>
@@ -35,166 +33,135 @@
     </div>
   </div>
 
-<!-- ============================= -->
-<!-- Formulaire "Mot de passe oublié" (caché par défaut) -->
-<!-- ============================= -->
-<div id="forgotPasswordForm" class="hidden">
-  <div class="cadre">
-    <div class="container">
-      <!-- Bannière -->
-      <img src="https://i.postimg.cc/sgJn040S/SGS25NG.png" alt="Bannière" class="banner-image">
-
-      <!-- Titre -->
-      <label>Réinitialisation du mot de passe</label>
-
-      <!-- Nom d'utilisateur -->
-      <input type="text" id="forgotUsername" placeholder="Nom d'utilisateur">
-
-      <!-- Question secrète (affichée automatiquement) -->
-      <label for="forgotSecretAnswer" id="forgotSecretQuestionLabel">-</label>
-
-      <!-- Réponse secrète -->
-      <input type="text" id="forgotSecretAnswer" placeholder="Réponse à la question">
-
-      <!-- Nouveau mot de passe -->
-      <input type="password" id="forgotNewPassword" placeholder="Nouveau mot de passe">
-
-      <!-- Boutons -->
-      <button id="resetPasswordBtn">Réinitialiser</button>
-      <button id="cancelForgotBtn">Annuler</button>
-
-      <!-- Message d'erreur / info -->
-      <p id="forgotError" class="error"></p>
+  <!-- Formulaire "Mot de passe oublié" (caché par défaut) -->
+  <div id="forgotPasswordForm" class="hidden">
+    <div class="cadre">
+      <div class="container">
+        <img src="https://i.postimg.cc/sgJn040S/SGS25NG.png" alt="Bannière" class="banner-image">
+        <label>Réinitialisation du mot de passe</label>
+        <input type="text" id="forgotUsername" placeholder="Nom d'utilisateur">
+        <label for="forgotSecretAnswer" id="forgotSecretQuestionLabel">-</label>
+        <input type="text" id="forgotSecretAnswer" placeholder="Réponse à la question">
+        <input type="password" id="forgotNewPassword" placeholder="Nouveau mot de passe">
+        <button id="resetPasswordBtn">Réinitialiser</button>
+        <button id="cancelForgotBtn">Annuler</button>
+        <p id="forgotError" class="error"></p>
+      </div>
     </div>
   </div>
-</div>
 
+  <!-- Page d'accueil -->
+  <div id="homePage">
+    <div class="cadre">
+      <div class="container">
+        <img src="https://i.postimg.cc/sgJn040S/SGS25NG.png" alt="Bannière" class="banner-image">
+        <h2>Bienvenue <span id="welcomeUsername"></span>, <span class="line-break">sur la compta Pop's Diner!</span></h2>
+        <button id="goToOrderButton" class="home-button">Prendre une commande clients</button>
+        <button id="editProfileButton" class="home-button">Modifier mon profil</button>
+        <button id="logoutHomeButton" class="home-button">Déconnexion</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Conteneur principal -->
   <div id="appContainer" style="display: none;">
     <div class="cadre">
       <div class="user-info-container">
         <div id="userInfo">
-         
-          
-
-      <div class="container">
- <img
-  src="https://i.postimg.cc/sgJn040S/SGS25NG.png"
-  alt="Menu Options"
-  class="banner-image options-button"
-  id="optionsToggle"
->
-  <!-- Menu déroulant avec les options -->
-  <div class="options-dropdown" id="optionsDropdown">
-  <button id="editProfileOption" class="dropdown-option">Modifier mon profil</button>
-  <button id="logoutButton" class="dropdown-option">Déconnexion</button>
-  </div>
-        <!-- Date et semaine -->
-        <label>Date du jour</label>
-        <input type="text" id="dateJour" readonly>
-        <label>Jour</label>
-        <input type="text" id="jourLettre">
-        <label>N° de semaine</label>
-        <input type="text" id="numSemaine">
-        <!-- Employé -->
-        <label>Employé</label>
-        <input type="text" id="employe" readonly>
-        <!-- Contrat -->
-        <label>Contrat entreprise</label>
-        <select id="contrat_entreprise">
-          <option value="">Sans contrat</option>
-        </select>
-        <!-- Client -->
-        <label>Client</label>
-        <select id="noms_des_client">
-          <option value="">-</option>
-          <option value="nouveau">+ Nouveau client...</option>
-        </select>
-        <!-- Champ pour ajouter un nouveau client -->
-        <div id="nouveauClientContainer">
-          <input type="text" id="nouveauClientInput" placeholder="Nom du nouveau client">
-          <button id="validerNouveauClient">Ajouter</button>
+          <div class="container">
+            <img src="https://i.postimg.cc/sgJn040S/SGS25NG.png" alt="Menu Options" class="banner-image options-button" id="backToHomeButton">
+            <label>Date du jour</label>
+            <input type="text" id="dateJour" readonly>
+            <label>Jour</label>
+            <input type="text" id="jourLettre">
+            <label>N° de semaine</label>
+            <input type="text" id="numSemaine">
+            <label>Employé</label>
+            <input type="text" id="employe" readonly>
+            <label>Contrat entreprise</label>
+            <select id="contrat_entreprise">
+              <option value="">Sans contrat</option>
+            </select>
+            <label>Client</label>
+            <select id="noms_des_client">
+              <option value="">-</option>
+              <option value="nouveau">+ Nouveau client...</option>
+            </select>
+            <div id="nouveauClientContainer">
+              <input type="text" id="nouveauClientInput" placeholder="Nom du nouveau client">
+              <button id="validerNouveauClient">Ajouter</button>
+            </div>
+            <select id="menu" class="full-width rose-select">
+              <option value="sans menu">sans menu</option>
+            </select>
+            <select class="rose-select product-select" data-type="plat" data-position="1">
+              <option value="">-</option>
+            </select>
+            <input type="number" min="0" value="0" class="product-quantity" data-type="plat" data-position="1">
+            <select class="rose-select product-select" data-type="accompagnement" data-position="2">
+              <option value="">-</option>
+            </select>
+            <input type="number" min="0" value="0" class="product-quantity" data-type="accompagnement" data-position="2">
+            <select class="rose-select product-select" data-type="dessert" data-position="3">
+              <option value="">-</option>
+            </select>
+            <input type="number" min="0" value="0" class="product-quantity" data-type="dessert" data-position="3">
+            <select class="rose-select product-select" data-type="boisson" data-position="4">
+              <option value="">-</option>
+            </select>
+            <input type="number" min="0" value="0" class="product-quantity" data-type="boisson" data-position="4">
+            <select class="rose-select product-select" data-type="optionnel" data-position="5">
+              <option value="">-</option>
+            </select>
+            <input type="number" min="0" value="0" class="product-quantity" data-type="optionnel" data-position="5">
+            <label>Ticket restaurant</label>
+            <div class="ticket-row">
+              <input type="checkbox" id="ticket">
+              <input type="number" id="ticketNombre" min="1" value="0" class="product-quantity" placeholder="Nombre" disabled>
+            </div>
+            <label>Coût global matière première</label>
+            <input type="text" id="coutGlobalMatierePremiere" value="0 €" readonly>
+            <label>Prix à faire payer</label>
+            <input type="text" id="PrixAFairePayer" value="0 €" readonly>
+            <label>Bénéfice</label>
+            <input type="text" id="benefice" value="0 €" readonly>
+            <button id="enregistrer">Enregistrer la commande</button>
+            <div id="status" class="status"></div>
+          </div>
         </div>
-        <!-- Menu -->
-        <select id="menu" class="full-width rose-select">
-          <option value="sans menu">sans menu</option>
-        </select>
-        <!-- Produits -->
-        <select class="rose-select product-select" data-type="plat" data-position="1">
-          <option value="">-</option>
-        </select>
-        <input type="number" min="0" value="0" class="product-quantity" data-type="plat" data-position="1">
-        <select class="rose-select product-select" data-type="accompagnement" data-position="2">
-          <option value="">-</option>
-        </select>
-        <input type="number" min="0" value="0" class="product-quantity" data-type="accompagnement" data-position="2">
-        <select class="rose-select product-select" data-type="dessert" data-position="3">
-          <option value="">-</option>
-        </select>
-        <input type="number" min="0" value="0" class="product-quantity" data-type="dessert" data-position="3">
-        <select class="rose-select product-select" data-type="boisson" data-position="4">
-          <option value="">-</option>
-        </select>
-        <input type="number" min="0" value="0" class="product-quantity" data-type="boisson" data-position="4">
-        <select class="rose-select product-select" data-type="optionnel" data-position="5">
-          <option value="">-</option>
-        </select>
-        <input type="number" min="0" value="0" class="product-quantity" data-type="optionnel" data-position="5">
-        <!-- Ticket restaurant -->
-        <label>Ticket restaurant</label>
-        <div class="ticket-row">
-          <input type="checkbox" id="ticket">
-          <input type="number" id="ticketNombre" min="1" value="0" class="product-quantity" placeholder="Nombre" disabled>
-        </div>
-        <!-- Totaux -->
-        <label>Coût global matière première</label>
-        <input type="text" id="coutGlobalMatierePremiere" value="0 €" readonly>
-        <label>Prix à faire payer</label>
-        <input type="text" id="PrixAFairePayer" value="0 €" readonly>
-        <label>Bénéfice</label>
-        <input type="text" id="benefice" value="0 €" readonly>
-        <!-- Bouton d'envoi -->
-        <button id="enregistrer">Enregistrer la commande</button>
-        <!-- Statut -->
-        <div id="status" class="status"></div>
       </div>
     </div>
   </div>
 
-<!-- Formulaire de modification de profil (modal séparé) -->
-<div id="editProfileForm" class="modal">
+ <!-- Page de modification de profil -->
+<div id="editProfilePage" style="display: none;">
   <div class="cadre">
-    <h2>Modifier mon profil</h2>
-    <div id="editProfileError" class="status error"></div>
-    <div class="container">
+    <div class="container profile-form">
+      <img src="https://i.postimg.cc/sgJn040S/SGS25NG.png" alt="Menu Options" class="banner-image options-button" id="backToHomeButton2">
+      <h2>Modifier mon profil</h2>
+      <div id="editProfileError" class="status error"></div>
       <label for="newUsername">Identifiant</label>
       <input type="text" id="newUsername" placeholder="Nouvel identifiant" required>
-
       <label for="currentPassword">Mot de passe actuel</label>
       <input type="password" id="currentPassword" placeholder="Mot de passe actuel" required>
-
       <label for="newPassword">Nouveau mot de passe (optionnel)</label>
-      <input type="password" id="editNewPassword" placeholder="Laisser vide pour ne pas changer">
-
+      <input type="password" id="newPassword" placeholder="Laisser vide pour ne pas changer">
       <label for="secretQuestion">Question secrète</label>
       <select id="secretQuestion">
         <option value="">-- Sélectionnez une question --</option>
         <option value="Quel est le nom de votre premier animal de compagnie ?">Quel est le nom de votre premier animal de compagnie ?</option>
         <option value="Dans quelle ville êtes-vous né(e) ?">Dans quelle ville êtes-vous né(e) ?</option>
-        <option value="Quel était le nom de votre professeur préféré ?">Quel était le nom de votre professeur préféré ?</option>
       </select>
-
       <label for="secretAnswer">Réponse secrète</label>
-      <input type="text" id="editSecretAnswer" placeholder="Votre réponse secrète">
-
-      <div class="password-buttons">
+      <input type="text" id="secretAnswer" placeholder="Votre réponse secrète">
+      <div class="profile-buttons">
         <button id="confirmEditProfileButton">Enregistrer</button>
-        <button id="cancelEditProfileButton">Annuler</button>
       </div>
     </div>
   </div>
 </div>
+<script src="script.js"></script>
+
 
   <script src="script.js"></script>
 </body>
