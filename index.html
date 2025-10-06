@@ -58,6 +58,7 @@
         <h2>Bienvenue <span id="welcomeUsername"></span>, <span class="line-break">sur la compta Pop's Diner!</span></h2>
         <button id="goToOrderButton" class="home-button">Prendre une commande clients</button>
         <button id="editProfileButton" class="home-button">Modifier mon profil</button>
+        <button id="addEmployeButton" class="home-button">Ajouter un employé</button>
         <button id="logoutHomeButton" class="home-button">Déconnexion</button>
       </div>
     </div>
@@ -138,7 +139,7 @@
   <div class="cadre">
     <div class="container profile-form">
       <img src="https://i.postimg.cc/sgJn040S/SGS25NG.png" alt="Menu Options" class="banner-image options-button" id="backToHomeButton2">
-      <h2>Modifier mon profil</h2>
+      <h2>Gestion de mon profil</h2>
       <div id="editProfileError" class="status error"></div>
       <label for="newUsername">Identifiant</label>
       <input type="text" id="newUsername" placeholder="Nouvel identifiant" required>
@@ -154,15 +155,50 @@
       </select>
       <label for="secretAnswer">Réponse secrète</label>
       <input type="text" id="secretAnswer" placeholder="Votre réponse secrète">
+      <label for="n°phone">Numero de telephone</label>
+      <input type="text" id="n°phone" placeholder="Votre numero de telephone" required>
+      <label for="Iban">Numero de compte</label>
+      <input type="text" id="Iban" placeholder="Votre numero de compte" required>
       <div class="profile-buttons">
         <button id="confirmEditProfileButton">Enregistrer</button>
       </div>
     </div>
   </div>
 </div>
-<script src="script.js"></script>
 
+   
 
-  <script src="script.js"></script>
-</body>
+    <!-- Page d'ajout d'employé -->
+    <div id="addEmployePage" style="display: none;">
+      <div class="cadre">
+        <div class="container profile-form">
+          <img src="https://i.postimg.cc/sgJn040S/SGS25NG.png" alt="Menu Options" class="banner-image options-button" id="backToHomeButton3">
+          <h2>Ajouter un employé</h2>
+          <div id="addEmployeError" class="status error"></div>
+
+          <label for="employeUsername">Identifiant (username)</label>
+          <input type="text" id="employeUsername" placeholder="Identifiant de connexion" required>
+
+          <label for="employePassword">Mot de passe</label>
+          <input type="password" id="employePassword" placeholder="Mot de passe" required>
+
+          <label for="employeRole">Rôle</label>
+          <select id="employeRole" required>
+            <option value="">-- Sélectionnez un rôle --</option>
+            <!-- Les rôles seront chargés dynamiquement depuis Google Sheets (colonne D3:D) -->
+          </select>
+
+          <label for="employeNom">Nom de l'employé</label>
+          <input type="text" id="employeNom" placeholder="Nom complet" required>
+
+          <div class="profile-buttons">
+            <button id="confirmAddEmployeButton">Ajouter</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
 </html>
+

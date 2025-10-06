@@ -489,13 +489,7 @@ input[type="checkbox"] {
   width: 100%;
 }
 
-.profile-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 15px;
-  width: 100%;
-}
+
 
 .profile-buttons button {
   background: #e91e63;
@@ -510,6 +504,10 @@ input[type="checkbox"] {
   width: 100%;
   max-width: 300px;
 }
+.profile-buttons button:hover {
+  background: #fa2759;
+}
+
 
 /* Adaptation pour mobile */
 @media (max-width: 480px) {
@@ -755,9 +753,112 @@ input[type="checkbox"] {
   background: #fa2759;
 }
   
-  
+  /* Style pour la page d'ajout d'employé */
+#addEmployePage {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1001;
+  overflow-y: auto;
+}
 
+#addEmployePage .cadre {
+  background: #5ebec9;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #ffffff;
+  max-width: 600px;
+  margin: 50px auto;
+  width: 90%;
+}
 
+#addEmployePage .container.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+#addEmployePage .banner-image.options-button {
+  display: block;
+  margin: 0 auto 15px;
+  max-width: 100%;
+  cursor: pointer;
+}
+
+#addEmployePage h2 {
+  color: #fff;
+  margin: 0 auto 20px;
+  text-align: center;
+}
+
+#addEmployePage .status.error {
+  color: #ff5252;
+  background: rgba(255, 82, 82, 0.2);
+  padding: 8px;
+  border-radius: 4px;
+  text-align: center;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+#addEmployePage label {
+  border: 1px solid #ffffff;
+  background: #e91e63;
+  padding: 5px;
+  border-radius: 3px;
+  font-weight: bold;
+  text-align: center;
+  color: white;
+  width: 100%;
+}
+
+#addEmployePage input,
+#addEmployePage select {
+  border: 1px solid #ffffff;
+  background: #b2ebf2;
+  padding: 5px;
+  border-radius: 3px;
+  text-align: center;
+  width: 100%;
+}
+
+#addEmployePage .profile-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+  width: 100%;
+}
+
+#addEmployePage .profile-buttons button {
+  background: #e91e63;
+  color: white;
+  border: 1px solid #ffffff;
+  padding: 12px 20px;
+  margin: 0 auto;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  width: 100%;
+  max-width: 300px;
+}
+#addEmployeButton {
+  display: block; /* ou le style par défaut que vous utilisez */
+}
+
+#addEmployeButton[style*="display: none"] {
+  display: none !important;
+}
+
+#addEmployePage .profile-buttons button:hover {
+  background: #fa2759;
+}
 
 
 

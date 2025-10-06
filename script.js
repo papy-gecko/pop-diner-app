@@ -1,4 +1,5 @@
-const webAppUrl = "https://script.google.com/macros/s/AKfycbx-KLhig1l6aLqe148kmCOr0jzCjf0lCNk_pidvEBtSuuRyMOzmHeXTji3PUWIbdWJo1Q/exec";
+const webAppUrl = "https://script.google.com/macros/s/AKfycbwcGEV0ZcMt9iB5TjcynwZOg80fz2GibC-2mHSClXl7GvIZ3VuGJNGjvvTCa8czhNGJeA/exec";
+
 // Variables globales
 let ticketUnitValue = 8;
 let isMenuStandard = false;
@@ -17,6 +18,19 @@ function isUserLoggedIn() {
   return localStorage.getItem("stayConnected") === "true" &&
          localStorage.getItem("username") !== null &&
          localStorage.getItem("password") !== null;
+}
+
+// Fonction pour vérifier si l'utilisateur peut ajouter des employés
+function canAddEmploye() {
+  return currentUser && (currentUser.role === 'admin' || currentUser.role === 'patron');
+}
+
+// Fonction pour mettre à jour l'affichage du bouton "Ajouter un employé"
+function updateAddEmployeButtonVisibility() {
+  const addEmployeButton = document.getElementById('addEmployeButton');
+  if (addEmployeButton) {
+    addEmployeButton.style.display = canAddEmploye() ? 'block' : 'none';
+  }
 }
 
 // =============================
@@ -39,6 +53,7 @@ async function autoLoginFromStorage() {
     document.getElementById('welcomeUsername').textContent = currentUser.username;
     document.getElementById('employe').value = result.employe || savedUsername;
     await loadAllData();
+    updateAddEmployeButtonVisibility(); // Mise à jour de la visibilité du bouton
     return true;
   }
   return false;
@@ -113,6 +128,8 @@ async function login() {
     document.getElementById('welcomeUsername').textContent = currentUser.username;
     document.getElementById('employe').value = result.employe || username;
     await loadAllData();
+    updateAddEmployeButtonVisibility();
+
     const stayConnectedChecked = document.getElementById("stayConnected")?.checked;
     if (stayConnectedChecked) {
       localStorage.setItem("username", username);
@@ -143,6 +160,7 @@ function logout() {
   localStorage.removeItem("username");
   localStorage.removeItem("password");
   localStorage.setItem("stayConnected", "false");
+  updateAddEmployeButtonVisibility();
 }
 
 // Calcule le numéro de la semaine
@@ -457,6 +475,79 @@ async function enregistrerCommande() {
   }
 }
 
+// Charge les rôles depuis Google Sheets (colonne D de la feuille "Info")
+async function chargerRoles() {
+  try {
+    const result = await fetchData("getRoles");
+    if (result && result.length > 0) {
+      const selectRole = document.getElementById('employeRole');
+      selectRole.innerHTML = '<option value="">-- Sélectionnez un rôle --</option>';
+      result.forEach(role => {
+        const option = document.createElement('option');
+        option.value = role;
+        option.textContent = role;
+        selectRole.appendChild(option);
+      });
+    } else {
+      setStatus("Aucun rôle disponible.", true, 'addEmployeError');
+    }
+  } catch (error) {
+    setStatus(`Erreur lors du chargement des rôles : ${error.message}`, true, 'addEmployeError');
+  }
+}
+
+async function ajouterEmploye() {
+  const username = document.getElementById('employeUsername').value.trim();
+  const password = document.getElementById('employePassword').value;
+  const nom = document.getElementById('employeNom').value.trim();
+  const role = document.getElementById('employeRole').value;
+
+  // Validation des champs
+  if (!username || !password || !nom || !role) {
+    setStatus("Tous les champs sont obligatoires.", true, 'addEmployeError');
+    return;
+  }
+
+  if (username.length < 3) {
+    setStatus("L'identifiant doit faire au moins 3 caractères.", true, 'addEmployeError');
+    return;
+  }
+
+  if (password.length < 6) {
+    setStatus("Le mot de passe doit faire au moins 6 caractères.", true, 'addEmployeError');
+    return;
+  }
+
+  // Envoi des données à l'API
+  try {
+    const response = await fetch(webAppUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "addUser",
+        username: username,
+        password: password,
+        employe: nom,
+        role: role
+      })
+    });
+
+    // En mode no-cors, on ne peut pas lire la réponse JSON
+    // On suppose que la requête a réussi si elle ne lance pas d'erreur
+    setStatus("Employé ajouté avec succès !", false, 'addEmployeError');
+
+    // Retour à l'accueil après 1,5 seconde
+    setTimeout(() => {
+      document.getElementById('addEmployePage').style.display = 'none';
+      document.getElementById('homePage').style.display = 'block';
+      updateAddEmployeButtonVisibility(); // Mettre à jour la visibilité du bouton après ajout
+    }, 1500);
+  } catch (error) {
+    setStatus(`Erreur : ${error.message}`, true, 'addEmployeError');
+  }
+}
+
 // Initialisation et écouteurs d'événements
 document.addEventListener('DOMContentLoaded', async () => {
   // Cache les contenus au démarrage
@@ -465,7 +556,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Vérifie si l'utilisateur est resté connecté
   if (isUserLoggedIn()) {
-    await autoLoginFromStorage();
+    const loggedIn = await autoLoginFromStorage();
+    if (loggedIn) {
+      updateAddEmployeButtonVisibility(); // Mettre à jour la visibilité après connexion automatique
+    }
   }
 
   // Vérification de "Se rappeler de moi"
@@ -484,7 +578,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Écouteurs pour le formulaire de login
   document.getElementById('loginButton').addEventListener('click', login);
-  document.getElementById('logoutHomeButton').addEventListener('click', logout);
+
+  document.getElementById('logoutHomeButton').addEventListener('click', () => {
+    logout();
+    updateAddEmployeButtonVisibility(); // Mettre à jour la visibilité après déconnexion
+  });
 
   // Écouteurs pour le formulaire principal
   document.getElementById('menu').addEventListener('change', handleMenuSelection);
@@ -495,18 +593,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       else calculerTotaux();
     });
   });
+
   document.querySelectorAll('.product-quantity').forEach(input => {
     input.addEventListener('input', () => {
       if (input.dataset.position === "1") syncQuantities();
       else calculerTotaux();
     });
   });
+
   document.getElementById('ticket').addEventListener('change', function() {
     document.getElementById('ticketNombre').disabled = !this.checked;
     document.getElementById('ticketNombre').value = this.checked ? 1 : 0;
     calculerTotaux();
   });
+
   document.getElementById('ticketNombre').addEventListener('input', calculerTotaux);
+
   document.getElementById('noms_des_client').addEventListener('change', function() {
     if (this.value === "nouveau") {
       document.getElementById('nouveauClientContainer').style.display = 'block';
@@ -516,15 +618,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       selectedClient = this.value;
     }
   });
+
   document.getElementById('validerNouveauClient').addEventListener('click', ajouterNouveauClient);
   document.getElementById('enregistrer').addEventListener('click', enregistrerCommande);
 
-// Écouteurs pour la page d'accueil
-document.getElementById('goToOrderButton').addEventListener('click', () => {
-  document.getElementById('homePage').style.display = 'none';
-  document.getElementById('appContainer').style.display = 'block';
-  updateDateInfo();
-});
+  // Écouteurs pour la page d'accueil
+  document.getElementById('goToOrderButton').addEventListener('click', () => {
+    document.getElementById('homePage').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'block';
+    updateDateInfo();
+  });
 
 document.getElementById('editProfileButton').addEventListener('click', () => {
   document.getElementById('homePage').style.display = 'none';
@@ -535,42 +638,62 @@ document.getElementById('editProfileButton').addEventListener('click', () => {
   setStatus('', false, 'editProfileError');
   fetchData("getUserDetails", { username: currentUser.username })
     .then(userDetails => {
-      if (userDetails.success && userDetails.secret_question) {
-        document.getElementById('secretQuestion').value = userDetails.secret_question;
+      if (userDetails.success) {
+        document.getElementById('secretQuestion').value = userDetails.secret_question || "";
+        document.getElementById('n°phone').value = userDetails.phone_number || "";
+        document.getElementById('Iban').value = userDetails.iban || "";
       }
     });
 });
 
-document.getElementById('backToHomeButton').addEventListener('click', () => {
-  document.getElementById('appContainer').style.display = 'none';
-  document.getElementById('homePage').style.display = 'block';
-});
+  document.getElementById('addEmployeButton').addEventListener('click', () => {
+    document.getElementById('homePage').style.display = 'none';
+    document.getElementById('addEmployePage').style.display = 'block';
+    // Réinitialisation des champs
+    document.getElementById('employeUsername').value = '';
+    document.getElementById('employePassword').value = '';
+    document.getElementById('employeNom').value = '';
+    document.getElementById('employeRole').innerHTML = '<option value="">-- Sélectionnez un rôle --</option>';
+    // Chargement des rôles depuis Google Sheets
+    chargerRoles();
+    // Réinitialisation des messages d'erreur
+    setStatus('', false, 'addEmployeError');
+  });
 
-document.getElementById('backToHomeButton2').addEventListener('click', () => {
-  document.getElementById('editProfilePage').style.display = 'none';
-  document.getElementById('homePage').style.display = 'block';
-});
+  document.getElementById('backToHomeButton').addEventListener('click', () => {
+    document.getElementById('appContainer').style.display = 'none';
+    document.getElementById('homePage').style.display = 'block';
+  });
 
-
-// Écouteurs pour le formulaire de modification de profil
-const cancelEditProfileButton = document.getElementById('cancelEditProfileButton');
-const confirmEditProfileButton = document.getElementById('confirmEditProfileButton');
-
-if (cancelEditProfileButton) {
-  cancelEditProfileButton.addEventListener('click', function() {
+  document.getElementById('backToHomeButton2').addEventListener('click', () => {
     document.getElementById('editProfilePage').style.display = 'none';
     document.getElementById('homePage').style.display = 'block';
   });
-}
 
-if (confirmEditProfileButton) {
+  document.getElementById('backToHomeButton3').addEventListener('click', () => {
+    document.getElementById('addEmployePage').style.display = 'none';
+    document.getElementById('homePage').style.display = 'block';
+  });
+
+  // Écouteurs pour le formulaire de modification de profil
+  const cancelEditProfileButton = document.getElementById('cancelEditProfileButton');
+  const confirmEditProfileButton = document.getElementById('confirmEditProfileButton');
+  if (cancelEditProfileButton) {
+    cancelEditProfileButton.addEventListener('click', function() {
+      document.getElementById('editProfilePage').style.display = 'none';
+      document.getElementById('homePage').style.display = 'block';
+    });
+  }
+  if (confirmEditProfileButton) {
   confirmEditProfileButton.addEventListener('click', async function() {
     let newUsername = document.getElementById('newUsername').value.trim();
     let currentPassword = document.getElementById('currentPassword').value;
     let newPassword = document.getElementById('newPassword').value;
     let secretQuestion = document.getElementById('secretQuestion').value;
     let secretAnswer = document.getElementById('secretAnswer').value.trim();
-    
+    let phoneNumber = document.getElementById('n°phone').value.trim();
+    let iban = document.getElementById('Iban').value.trim();
+
     if (!currentPassword) {
       setStatus("Veuillez entrer votre mot de passe actuel.", true, 'editProfileError');
       return;
@@ -587,7 +710,15 @@ if (confirmEditProfileButton) {
       setStatus("Veuillez entrer une réponse à votre question secrète.", true, 'editProfileError');
       return;
     }
-    
+    if (!phoneNumber) {
+      setStatus("Veuillez entrer un numéro de téléphone.", true, 'editProfileError');
+      return;
+    }
+    if (!iban) {
+      setStatus("Veuillez entrer un numéro de compte (IBAN).", true, 'editProfileError');
+      return;
+    }
+
     try {
       await fetch(webAppUrl, {
         method: "POST",
@@ -600,36 +731,37 @@ if (confirmEditProfileButton) {
           newUsername: newUsername,
           newPassword: newPassword,
           secretQuestion: secretQuestion,
-          secretAnswer: secretAnswer
+          secretAnswer: secretAnswer,
+          phoneNumber: phoneNumber,
+          iban: iban
         })
       });
-      
       setStatus("Profil mis à jour avec succès !", false, 'editProfileError');
-      
       if (newUsername !== currentUser.username) {
         currentUser = { ...currentUser, username: newUsername };
         document.getElementById('employe').value = newUsername;
         document.getElementById('welcomeUsername').textContent = newUsername;
       }
-      
       if (newPassword) {
         currentPassword = newPassword;
         if (localStorage.getItem("stayConnected") === "true") {
           localStorage.setItem("password", newPassword);
         }
       }
-      
       setTimeout(() => {
         document.getElementById('editProfilePage').style.display = 'none';
         document.getElementById('homePage').style.display = 'block';
       }, 1500);
-      
       await loadAllData();
     } catch (error) {
       setStatus(`Erreur: ${error.message}`, true, 'editProfileError');
     }
   });
 }
+
+
+  // Écouteur pour le bouton d'ajout d'employé
+  document.getElementById('confirmAddEmployeButton').addEventListener('click', ajouterEmploye);
 
   // Gestion du "Mot de passe oublié"
   const forgotPasswordLink = document.querySelector(".forgot-password");
@@ -649,12 +781,14 @@ if (confirmEditProfileButton) {
       setStatus("", false, "forgotError");
     });
   }
+
   if (cancelForgotBtn) {
     cancelForgotBtn.addEventListener("click", () => {
       forgotPasswordForm.style.display = "none";
       document.getElementById("loginForm").style.display = "flex";
     });
   }
+
   if (resetPasswordBtn) {
     resetPasswordBtn.addEventListener("click", async () => {
       const username = forgotUsernameInput.value.trim();
@@ -690,6 +824,7 @@ if (confirmEditProfileButton) {
       }
     });
   }
+
   if (forgotUsernameInput) {
     forgotUsernameInput.addEventListener("blur", async function() {
       const username = this.value.trim();
