@@ -95,6 +95,7 @@ label {
   font-weight: bold;
   text-align: center;
   font-size: clamp(12px, 2vw, 16px);
+  
 }
 
 input, select {
@@ -178,20 +179,21 @@ input[type="checkbox"] {
 
 /* Boutons */
 #enregistrer, #validerNouveauClient {
-  background: #4CAF50;
+    background: #fa2759;
   color: white;
   border: none;
   padding: 10px;
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
-  width: 100%;
-  margin-top: 10px;
-  font-size: clamp(14px, 2.5vw, 16px);
+  font-size: 16px;
+  margin-top: 5px;
+  border: 1px solid #ffffff;
+    grid-column: 1 / -1;
 }
 
 #enregistrer:hover, #validerNouveauClient:hover {
-  background: #45a049;
+  background: #fa2759;
 }
 
 /* Nouveau client */
@@ -238,11 +240,14 @@ input[type="checkbox"] {
 #loginForm .container label,
 #loginForm .container input,
 #loginForm #loginButton {
-  width: 100%;
-  max-width: 300px;
   box-sizing: border-box;
+  width: 100%;
+  padding: 8px; /* Ajuste selon tes préférences */
+  border: 1px solid #ffffff;
+  border-radius: 3px;
+  font-weight: bold;
+  text-align: center;
 }
-
 /* Style des labels */
 #loginForm .container label {
   border: 1px solid #ffffff;
@@ -350,14 +355,15 @@ input[type="checkbox"] {
 /* Adaptation mobile */
 @media (max-width: 480px) {
   #loginForm .cadre {
+ 
     width: 100vw;
+    max-width: 100vw;
     height: 100vh;
-    border-radius: 0;
     margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    padding: 10px;
+    border-radius: 0;
+    border: none;
+    box-sizing: border-box;
   }
   #loginForm .container {
     border-radius: 0;
@@ -515,12 +521,28 @@ input[type="checkbox"] {
     width: 95%;
     padding: 15px;
   }
-
+#editProfilePage .cadre {
+      width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 10px;
+    border-radius: 0;
+    border: none;
+    box-sizing: border-box;
+  }
   #editProfilePage input,
   #editProfilePage select {
-    font-size: 14px;
-  }
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px; /* Ajuste selon tes préférences */
+  border: 1px solid #ffffff;
+  border-radius: 3px;
+  font-weight: bold;
+  text-align: center;
 }
+  }
+
 
 .banner-image.options-button {
   width: 100%;
@@ -570,33 +592,30 @@ input[type="checkbox"] {
   box-sizing: border-box;
   gap: 10px;
 }
+#forgotPasswordForm label,
+#forgotPasswordForm input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px; /* Ajuste selon tes préférences */
+  border: 1px solid #ffffff;
+  border-radius: 3px;
+  font-weight: bold;
+  text-align: center;
+}
+
 
 /* Labels */
 #forgotPasswordForm label {
   border: 1px solid #ffffff;
   background: #e91e63;
-  padding: 8px;
-  border-radius: 3px;
-  font-weight: bold;
-  color: #fff;
-  font-size: 16px;
-  text-align: center;
-  width: 100%;
-  max-width: 300px;
-  box-sizing: border-box;
+
 }
 
 /* Inputs */
 #forgotPasswordForm input {
   border: 1px solid #ffffff;
   background: #b2ebf2;
-  padding: 10px;
-  border-radius: 3px;
-  text-align: center;
-  font-size: 16px;
-  width: 100%;
-  max-width: 300px;
-  box-sizing: border-box;
+
 }
 
 /* Boutons */
@@ -647,14 +666,14 @@ input[type="checkbox"] {
 /* Adaptation mobile */
 @media (max-width: 480px) {
   #forgotPasswordForm .cadre {
-    width: 100vw;
+     width: 100vw;
+    max-width: 100vw;
     height: 100vh;
-    border-radius: 0;
     margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    padding: 10px;
+    border-radius: 0;
+    border: none;
+    box-sizing: border-box;
   }
 
   #forgotPasswordForm .container {
@@ -752,7 +771,19 @@ input[type="checkbox"] {
 .home-button:hover {
   background: #fa2759;
 }
-  
+@media (max-width: 480px) {  
+#homePage .cadre {
+
+     width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 10px;
+    border-radius: 0;
+    border: none;
+    box-sizing: border-box;
+  }
+}
   /* Style pour la page d'ajout d'employé */
 #addEmployePage {
   display: none;
@@ -806,25 +837,27 @@ input[type="checkbox"] {
   font-weight: bold;
 }
 
+#addEmployePage input,
+#addEmployePage select,
 #addEmployePage label {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px; /* Ajuste selon tes préférences */
   border: 1px solid #ffffff;
-  background: #e91e63;
-  padding: 5px;
   border-radius: 3px;
   font-weight: bold;
   text-align: center;
+}
+
+#addEmployePage label {
+  background: #e91e63;
   color: white;
-  width: 100%;
+  display: block; /* Assure que le label prend toute la largeur */
 }
 
 #addEmployePage input,
 #addEmployePage select {
-  border: 1px solid #ffffff;
   background: #b2ebf2;
-  padding: 5px;
-  border-radius: 3px;
-  text-align: center;
-  width: 100%;
 }
 
 #addEmployePage .profile-buttons {
@@ -861,5 +894,17 @@ input[type="checkbox"] {
 }
 
 
+@media (max-width: 480px) {  
+#addEmployePage .cadre {
 
+     width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 10px;
+    border-radius: 0;
+    border: none;
+    box-sizing: border-box;
+  }
+}
 

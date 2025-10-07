@@ -9,7 +9,7 @@ let allData = {};
 let selectedClient = "";
 let currentUser = null;
 let currentPassword = "";
-let isHomePageVisible = true; // État de la page d'accueil
+let isHomePageVisible = true;
 
 // =============================
 // Vérifie si l'utilisateur est resté connecté
@@ -53,7 +53,7 @@ async function autoLoginFromStorage() {
     document.getElementById('welcomeUsername').textContent = currentUser.username;
     document.getElementById('employe').value = result.employe || savedUsername;
     await loadAllData();
-    updateAddEmployeButtonVisibility(); // Mise à jour de la visibilité du bouton
+    updateAddEmployeButtonVisibility();
     return true;
   }
   return false;
@@ -129,7 +129,6 @@ async function login() {
     document.getElementById('employe').value = result.employe || username;
     await loadAllData();
     updateAddEmployeButtonVisibility();
-
     const stayConnectedChecked = document.getElementById("stayConnected")?.checked;
     if (stayConnectedChecked) {
       localStorage.setItem("username", username);
@@ -391,91 +390,7 @@ async function ajouterNouveauClient() {
   }
 }
 
-// Envoie la commande à l'API
-async function enregistrerCommande() {
-  const dateJour = document.getElementById('dateJour').value;
-  const jour = document.getElementById('jourLettre').value;
-  const numSemaine = document.getElementById('numSemaine').value;
-  const employe = document.getElementById('employe').value;
-  const contrat = document.getElementById('contrat_entreprise').value;
-  const clientSelect = document.getElementById('noms_des_client');
-  const client = clientSelect.value === "nouveau" ? document.getElementById('nouveauClientInput').value : clientSelect.value;
-  const menu = document.getElementById('menu').value;
-  const hasTicket = document.getElementById('ticket').checked;
-  const ticketQty = hasTicket ? parseInt(document.getElementById('ticketNombre').value) || 0 : 0;
-  if (!employe) {
-    setStatus("Veuillez sélectionner un employé.", true);
-    return;
-  }
-  if (clientSelect.value === "nouveau" && !client) {
-    setStatus("Veuillez entrer un nom de client.", true);
-    return;
-  }
-  let data;
-  if (isMenuStandard) {
-    data = {
-      action: "enregistrerCommande",
-      typeCommande: "menu",
-      dateJour, jour, numSemaine, employe,
-      password: currentPassword,
-      contrat, client, menu,
-      menuPrice: currentMenuPrice, menuCost: currentMenuCost,
-      qte1: parseInt(document.querySelector('.product-quantity[data-position="1"]').value) || 1,
-      plat: document.querySelector('.product-select[data-position="1"]').value,
-      accompagnement: document.querySelector('.product-select[data-position="2"]').value,
-      dessert: document.querySelector('.product-select[data-position="3"]').value,
-      boisson: document.querySelector('.product-select[data-position="4"]').value,
-      optionnel: document.querySelector('.product-select[data-position="5"]').value,
-      hasTicket, ticketQty
-    };
-  } else {
-    const products = [];
-    document.querySelectorAll('.product-select').forEach(select => {
-      const position = select.dataset.position;
-      const input = document.querySelector(`.product-quantity[data-position="${position}"]`);
-      if (select.value !== "" && parseInt(input.value) > 0) {
-        products.push({
-          nom: select.value,
-          type: select.dataset.type,
-          quantite: parseInt(input.value),
-          prix: parseFloat(select.options[select.selectedIndex].dataset.price) || 0,
-          cost: parseFloat(select.options[select.selectedIndex].dataset.cost) || 0
-        });
-      }
-    });
-    if (products.length === 0) {
-      setStatus("Veuillez sélectionner au moins un produit.", true);
-      return;
-    }
-    data = {
-      action: "enregistrerCommande",
-      typeCommande: "libre",
-      dateJour, jour, numSemaine, employe,
-      password: currentPassword,
-      contrat, client, products, hasTicket, ticketQty
-    };
-  }
-  setStatus("Enregistrement en cours...");
-  try {
-    await fetch(webAppUrl, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    setStatus("Commande enregistrée avec succès !");
-    document.getElementById('menu').value = "sans menu";
-    unlockProductSelections();
-    calculerTotaux();
-    // Retour à l'accueil après enregistrement
-    document.getElementById('appContainer').style.display = 'none';
-    document.getElementById('homePage').style.display = 'block';
-  } catch (error) {
-    setStatus(`Erreur lors de l'enregistrement: ${error.message}`, true);
-  }
-}
-
-// Charge les rôles depuis Google Sheets (colonne D de la feuille "Info")
+// Charge les rôles depuis Google Sheets
 async function chargerRoles() {
   try {
     const result = await fetchData("getRoles");
@@ -501,24 +416,18 @@ async function ajouterEmploye() {
   const password = document.getElementById('employePassword').value;
   const nom = document.getElementById('employeNom').value.trim();
   const role = document.getElementById('employeRole').value;
-
-  // Validation des champs
   if (!username || !password || !nom || !role) {
     setStatus("Tous les champs sont obligatoires.", true, 'addEmployeError');
     return;
   }
-
   if (username.length < 3) {
     setStatus("L'identifiant doit faire au moins 3 caractères.", true, 'addEmployeError');
     return;
   }
-
   if (password.length < 6) {
     setStatus("Le mot de passe doit faire au moins 6 caractères.", true, 'addEmployeError');
     return;
   }
-
-  // Envoi des données à l'API
   try {
     const response = await fetch(webAppUrl, {
       method: "POST",
@@ -532,37 +441,118 @@ async function ajouterEmploye() {
         role: role
       })
     });
-
-    // En mode no-cors, on ne peut pas lire la réponse JSON
-    // On suppose que la requête a réussi si elle ne lance pas d'erreur
     setStatus("Employé ajouté avec succès !", false, 'addEmployeError');
-
-    // Retour à l'accueil après 1,5 seconde
     setTimeout(() => {
       document.getElementById('addEmployePage').style.display = 'none';
       document.getElementById('homePage').style.display = 'block';
-      updateAddEmployeButtonVisibility(); // Mettre à jour la visibilité du bouton après ajout
+      updateAddEmployeButtonVisibility();
     }, 1500);
   } catch (error) {
     setStatus(`Erreur : ${error.message}`, true, 'addEmployeError');
   }
 }
 
+// Enregistrer une commande dans Google Sheets
+async function enregistrerCommande() {
+  const dateJour = document.getElementById('dateJour').value;
+  const jourLettre = document.getElementById('jourLettre').value;
+  const numSemaine = document.getElementById('numSemaine').value;
+  const employe = document.getElementById('employe').value;
+  const contratEntreprise = document.getElementById('contrat_entreprise').value;
+  const client = document.getElementById('noms_des_client').value;
+  const menu = document.getElementById('menu').value;
+
+  const platSelect = document.querySelector('.product-select[data-type="plat"][data-position="1"]');
+  const platQuantite = document.querySelector('.product-quantity[data-type="plat"][data-position="1"]').value;
+  const accompagnementSelect = document.querySelector('.product-select[data-type="accompagnement"][data-position="2"]');
+  const accompagnementQuantite = document.querySelector('.product-quantity[data-type="accompagnement"][data-position="2"]').value;
+  const dessertSelect = document.querySelector('.product-select[data-type="dessert"][data-position="3"]');
+  const dessertQuantite = document.querySelector('.product-quantity[data-type="dessert"][data-position="3"]').value;
+  const boissonSelect = document.querySelector('.product-select[data-type="boisson"][data-position="4"]');
+  const boissonQuantite = document.querySelector('.product-quantity[data-type="boisson"][data-position="4"]').value;
+  const optionnelSelect = document.querySelector('.product-select[data-type="optionnel"][data-position="5"]');
+  const optionnelQuantite = document.querySelector('.product-quantity[data-type="optionnel"][data-position="5"]').value;
+
+  const useTicket = document.getElementById('ticket').checked;
+  const ticketNombre = document.getElementById('ticketNombre').value;
+
+  // Dans la fonction enregistrerCommande() de ton script.js
+const coutGlobal = parseInt(document.getElementById('coutGlobalMatierePremiere').value.replace(' €', ''));
+const prixFinal = parseInt(document.getElementById('PrixAFairePayer').value.replace(' €', ''));
+const benefice = parseInt(document.getElementById('benefice').value.replace(' €', ''));
+
+
+
+
+  const rowData = [
+    dateJour,                     // Colonne A
+    jourLettre,                   // Colonne B
+    numSemaine,                   // Colonne C
+    employe,                      // Colonne D
+    contratEntreprise,            // Colonne E
+    client,                       // Colonne F
+    menu,                         // Colonne G
+    platSelect.value,             // Colonne H
+    platQuantite,                 // Colonne I
+    accompagnementSelect.value,   // Colonne J
+    accompagnementQuantite,       // Colonne K
+    dessertSelect.value,          // Colonne L
+    dessertQuantite,              // Colonne M
+    boissonSelect.value,          // Colonne N
+    boissonQuantite,              // Colonne O
+    optionnelSelect.value,        // Colonne P
+    optionnelQuantite,            // Colonne Q
+    useTicket ? "OUI" : "NON",     // Colonne R
+    ticketNombre,                 // Colonne S
+    coutGlobal,                   // Colonne T
+    prixFinal,                    // Colonne U
+    benefice                      // Colonne V
+  ];
+
+  try {
+    setStatus("Enregistrement de la commande en cours...", false);
+    const response = await fetch(webAppUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "enregistrerCommandeLigne",
+        data: rowData
+      })
+    });
+    setStatus("Commande enregistrée avec succès !", false);
+    setTimeout(() => {
+      document.getElementById('menu').value = "sans menu";
+      unlockProductSelections();
+      document.querySelectorAll('.product-select').forEach(select => {
+        select.value = "";
+      });
+      document.querySelectorAll('.product-quantity').forEach(input => {
+        input.value = 0;
+      });
+      document.getElementById('ticket').checked = false;
+      document.getElementById('ticketNombre').value = 0;
+      document.getElementById('ticketNombre').disabled = true;
+      calculerTotaux();
+    }, 1500);
+  } catch (error) {
+    setStatus(`Erreur lors de l'enregistrement : ${error.message}`, true);
+    console.error("Erreur:", error);
+  }
+}
+
 // Initialisation et écouteurs d'événements
 document.addEventListener('DOMContentLoaded', async () => {
-  // Cache les contenus au démarrage
   document.getElementById('appContainer').style.display = 'none';
   document.getElementById('homePage').style.display = 'none';
 
-  // Vérifie si l'utilisateur est resté connecté
   if (isUserLoggedIn()) {
     const loggedIn = await autoLoginFromStorage();
     if (loggedIn) {
-      updateAddEmployeButtonVisibility(); // Mettre à jour la visibilité après connexion automatique
+      updateAddEmployeButtonVisibility();
     }
   }
 
-  // Vérification de "Se rappeler de moi"
   const rememberedUsername = localStorage.getItem('rememberedUsername');
   const rememberMeChecked = localStorage.getItem('rememberMe') === 'true';
   if (rememberedUsername && rememberMeChecked) {
@@ -570,21 +560,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('rememberMe').checked = true;
   }
 
-  // Vérifie si "Rester connecté" était coché
   const stayConnectedChecked = localStorage.getItem("stayConnected") === "true";
   if (stayConnectedChecked) {
     document.getElementById('stayConnected').checked = true;
   }
 
-  // Écouteurs pour le formulaire de login
   document.getElementById('loginButton').addEventListener('click', login);
-
   document.getElementById('logoutHomeButton').addEventListener('click', () => {
     logout();
-    updateAddEmployeButtonVisibility(); // Mettre à jour la visibilité après déconnexion
+    updateAddEmployeButtonVisibility();
   });
 
-  // Écouteurs pour le formulaire principal
   document.getElementById('menu').addEventListener('change', handleMenuSelection);
   document.querySelectorAll('.product-select').forEach(select => {
     select.addEventListener('change', () => {
@@ -593,22 +579,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       else calculerTotaux();
     });
   });
-
   document.querySelectorAll('.product-quantity').forEach(input => {
     input.addEventListener('input', () => {
       if (input.dataset.position === "1") syncQuantities();
       else calculerTotaux();
     });
   });
-
   document.getElementById('ticket').addEventListener('change', function() {
     document.getElementById('ticketNombre').disabled = !this.checked;
     document.getElementById('ticketNombre').value = this.checked ? 1 : 0;
     calculerTotaux();
   });
-
   document.getElementById('ticketNombre').addEventListener('input', calculerTotaux);
-
   document.getElementById('noms_des_client').addEventListener('change', function() {
     if (this.value === "nouveau") {
       document.getElementById('nouveauClientContainer').style.display = 'block';
@@ -619,44 +601,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  document.getElementById('validerNouveauClient').addEventListener('click', ajouterNouveauClient);
-  document.getElementById('enregistrer').addEventListener('click', enregistrerCommande);
-
-  // Écouteurs pour la page d'accueil
   document.getElementById('goToOrderButton').addEventListener('click', () => {
     document.getElementById('homePage').style.display = 'none';
     document.getElementById('appContainer').style.display = 'block';
     updateDateInfo();
   });
 
-document.getElementById('editProfileButton').addEventListener('click', () => {
-  document.getElementById('homePage').style.display = 'none';
-  document.getElementById('editProfilePage').style.display = 'block';
-  document.getElementById('newUsername').value = currentUser.username;
-  document.getElementById('currentPassword').value = '';
-  document.getElementById('newPassword').value = '';
-  setStatus('', false, 'editProfileError');
-  fetchData("getUserDetails", { username: currentUser.username })
-    .then(userDetails => {
-      if (userDetails.success) {
-        document.getElementById('secretQuestion').value = userDetails.secret_question || "";
-        document.getElementById('n°phone').value = userDetails.phone_number || "";
-        document.getElementById('Iban').value = userDetails.iban || "";
-      }
-    });
-});
+  document.getElementById('editProfileButton').addEventListener('click', () => {
+    document.getElementById('homePage').style.display = 'none';
+    document.getElementById('editProfilePage').style.display = 'block';
+    document.getElementById('newUsername').value = currentUser.username;
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    setStatus('', false, 'editProfileError');
+    fetchData("getUserDetails", { username: currentUser.username })
+      .then(userDetails => {
+        if (userDetails.success) {
+          document.getElementById('secretQuestion').value = userDetails.secret_question || "";
+          document.getElementById('n°phone').value = userDetails.phone_number || "";
+          document.getElementById('Iban').value = userDetails.iban || "";
+        }
+      });
+  });
 
   document.getElementById('addEmployeButton').addEventListener('click', () => {
     document.getElementById('homePage').style.display = 'none';
     document.getElementById('addEmployePage').style.display = 'block';
-    // Réinitialisation des champs
     document.getElementById('employeUsername').value = '';
     document.getElementById('employePassword').value = '';
     document.getElementById('employeNom').value = '';
     document.getElementById('employeRole').innerHTML = '<option value="">-- Sélectionnez un rôle --</option>';
-    // Chargement des rôles depuis Google Sheets
     chargerRoles();
-    // Réinitialisation des messages d'erreur
     setStatus('', false, 'addEmployeError');
   });
 
@@ -675,7 +650,6 @@ document.getElementById('editProfileButton').addEventListener('click', () => {
     document.getElementById('homePage').style.display = 'block';
   });
 
-  // Écouteurs pour le formulaire de modification de profil
   const cancelEditProfileButton = document.getElementById('cancelEditProfileButton');
   const confirmEditProfileButton = document.getElementById('confirmEditProfileButton');
   if (cancelEditProfileButton) {
@@ -685,85 +659,83 @@ document.getElementById('editProfileButton').addEventListener('click', () => {
     });
   }
   if (confirmEditProfileButton) {
-  confirmEditProfileButton.addEventListener('click', async function() {
-    let newUsername = document.getElementById('newUsername').value.trim();
-    let currentPassword = document.getElementById('currentPassword').value;
-    let newPassword = document.getElementById('newPassword').value;
-    let secretQuestion = document.getElementById('secretQuestion').value;
-    let secretAnswer = document.getElementById('secretAnswer').value.trim();
-    let phoneNumber = document.getElementById('n°phone').value.trim();
-    let iban = document.getElementById('Iban').value.trim();
-
-    if (!currentPassword) {
-      setStatus("Veuillez entrer votre mot de passe actuel.", true, 'editProfileError');
-      return;
-    }
-    if (newUsername.length < 3) {
-      setStatus("L'identifiant doit faire au moins 3 caractères.", true, 'editProfileError');
-      return;
-    }
-    if (newPassword && newPassword.length < 6) {
-      setStatus("Le mot de passe doit faire au moins 6 caractères.", true, 'editProfileError');
-      return;
-    }
-    if (secretQuestion && !secretAnswer) {
-      setStatus("Veuillez entrer une réponse à votre question secrète.", true, 'editProfileError');
-      return;
-    }
-    if (!phoneNumber) {
-      setStatus("Veuillez entrer un numéro de téléphone.", true, 'editProfileError');
-      return;
-    }
-    if (!iban) {
-      setStatus("Veuillez entrer un numéro de compte (IBAN).", true, 'editProfileError');
-      return;
-    }
-
-    try {
-      await fetch(webAppUrl, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "editProfile",
-          username: currentUser.username,
-          currentPassword: currentPassword,
-          newUsername: newUsername,
-          newPassword: newPassword,
-          secretQuestion: secretQuestion,
-          secretAnswer: secretAnswer,
-          phoneNumber: phoneNumber,
-          iban: iban
-        })
-      });
-      setStatus("Profil mis à jour avec succès !", false, 'editProfileError');
-      if (newUsername !== currentUser.username) {
-        currentUser = { ...currentUser, username: newUsername };
-        document.getElementById('employe').value = newUsername;
-        document.getElementById('welcomeUsername').textContent = newUsername;
+    confirmEditProfileButton.addEventListener('click', async function() {
+      let newUsername = document.getElementById('newUsername').value.trim();
+      let currentPassword = document.getElementById('currentPassword').value;
+      let newPassword = document.getElementById('newPassword').value;
+      let secretQuestion = document.getElementById('secretQuestion').value;
+      let secretAnswer = document.getElementById('secretAnswer').value.trim();
+      let phoneNumber = document.getElementById('n°phone').value.trim();
+      let iban = document.getElementById('Iban').value.trim();
+      if (!currentPassword) {
+        setStatus("Veuillez entrer votre mot de passe actuel.", true, 'editProfileError');
+        return;
       }
-      if (newPassword) {
-        currentPassword = newPassword;
-        if (localStorage.getItem("stayConnected") === "true") {
-          localStorage.setItem("password", newPassword);
+      if (newUsername.length < 3) {
+        setStatus("L'identifiant doit faire au moins 3 caractères.", true, 'editProfileError');
+        return;
+      }
+      if (newPassword && newPassword.length < 6) {
+        setStatus("Le mot de passe doit faire au moins 6 caractères.", true, 'editProfileError');
+        return;
+      }
+      if (secretQuestion && !secretAnswer) {
+        setStatus("Veuillez entrer une réponse à votre question secrète.", true, 'editProfileError');
+        return;
+      }
+      if (!phoneNumber) {
+        setStatus("Veuillez entrer un numéro de téléphone.", true, 'editProfileError');
+        return;
+      }
+      if (!iban) {
+        setStatus("Veuillez entrer un numéro de compte (IBAN).", true, 'editProfileError');
+        return;
+      }
+      try {
+        await fetch(webAppUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "editProfile",
+            username: currentUser.username,
+            currentPassword: currentPassword,
+            newUsername: newUsername,
+            newPassword: newPassword,
+            secretQuestion: secretQuestion,
+            secretAnswer: secretAnswer,
+            phoneNumber: phoneNumber,
+            iban: iban
+          })
+        });
+        setStatus("Profil mis à jour avec succès !", false, 'editProfileError');
+        if (newUsername !== currentUser.username) {
+          currentUser = { ...currentUser, username: newUsername };
+          document.getElementById('employe').value = newUsername;
+          document.getElementById('welcomeUsername').textContent = newUsername;
         }
+        if (newPassword) {
+          currentPassword = newPassword;
+          if (localStorage.getItem("stayConnected") === "true") {
+            localStorage.setItem("password", newPassword);
+          }
+        }
+        setTimeout(() => {
+          document.getElementById('editProfilePage').style.display = 'none';
+          document.getElementById('homePage').style.display = 'block';
+        }, 1500);
+        await loadAllData();
+      } catch (error) {
+        setStatus(`Erreur: ${error.message}`, true, 'editProfileError');
       }
-      setTimeout(() => {
-        document.getElementById('editProfilePage').style.display = 'none';
-        document.getElementById('homePage').style.display = 'block';
-      }, 1500);
-      await loadAllData();
-    } catch (error) {
-      setStatus(`Erreur: ${error.message}`, true, 'editProfileError');
-    }
-  });
-}
+    });
+  }
 
-
-  // Écouteur pour le bouton d'ajout d'employé
   document.getElementById('confirmAddEmployeButton').addEventListener('click', ajouterEmploye);
 
-  // Gestion du "Mot de passe oublié"
+  // Écouteur pour le bouton "Enregistrer la commande"
+  document.getElementById('enregistrer').addEventListener('click', enregistrerCommande);
+
   const forgotPasswordLink = document.querySelector(".forgot-password");
   const forgotPasswordForm = document.getElementById("forgotPasswordForm");
   const resetPasswordBtn = document.getElementById("resetPasswordBtn");
@@ -781,14 +753,12 @@ document.getElementById('editProfileButton').addEventListener('click', () => {
       setStatus("", false, "forgotError");
     });
   }
-
   if (cancelForgotBtn) {
     cancelForgotBtn.addEventListener("click", () => {
       forgotPasswordForm.style.display = "none";
       document.getElementById("loginForm").style.display = "flex";
     });
   }
-
   if (resetPasswordBtn) {
     resetPasswordBtn.addEventListener("click", async () => {
       const username = forgotUsernameInput.value.trim();
@@ -824,7 +794,6 @@ document.getElementById('editProfileButton').addEventListener('click', () => {
       }
     });
   }
-
   if (forgotUsernameInput) {
     forgotUsernameInput.addEventListener("blur", async function() {
       const username = this.value.trim();
@@ -845,6 +814,5 @@ document.getElementById('editProfileButton').addEventListener('click', () => {
     });
   }
 
-  // Initialise la date
   updateDateInfo();
 });
