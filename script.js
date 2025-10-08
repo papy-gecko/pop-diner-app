@@ -10,6 +10,7 @@ let selectedClient = "";
 let currentUser = null;
 let currentPassword = "";
 let isHomePageVisible = true;
+let allEmployees = []; // Variable globale pour stocker tous les employés
 
 // =============================
 // Vérifie si l'utilisateur est resté connecté
@@ -32,7 +33,13 @@ function updateAddEmployeButtonVisibility() {
     addEmployeButton.style.display = canAddEmploye() ? 'block' : 'none';
   }
 }
-
+// Fonction pour mettre à jour l'affichage du bouton "Ajouter un employé"
+function updatemanageEmployeButtonVisibility() {
+  const manageEmployeButton = document.getElementById('manageEmployeButton');
+  if (manageEmployeButton) {
+    manageEmployeButton.style.display = canAddEmploye() ? 'block' : 'none';
+  }
+}
 // =============================
 // Connexion automatique depuis le localStorage
 // =============================
@@ -54,6 +61,7 @@ async function autoLoginFromStorage() {
     document.getElementById('employe').value = result.employe || savedUsername;
     await loadAllData();
     updateAddEmployeButtonVisibility();
+    updatemanageEmployeButtonVisibility();
     return true;
   }
   return false;
@@ -129,6 +137,7 @@ async function login() {
     document.getElementById('employe').value = result.employe || username;
     await loadAllData();
     updateAddEmployeButtonVisibility();
+    updatemanageEmployeButtonVisibility();
     const stayConnectedChecked = document.getElementById("stayConnected")?.checked;
     if (stayConnectedChecked) {
       localStorage.setItem("username", username);
@@ -160,6 +169,7 @@ function logout() {
   localStorage.removeItem("password");
   localStorage.setItem("stayConnected", "false");
   updateAddEmployeButtonVisibility();
+  updatemanageEmployeButtonVisibility();
 }
 
 // Calcule le numéro de la semaine
@@ -550,6 +560,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const loggedIn = await autoLoginFromStorage();
     if (loggedIn) {
       updateAddEmployeButtonVisibility();
+      updatemanageEmployeButtonVisibility();
     }
   }
 
@@ -569,6 +580,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('logoutHomeButton').addEventListener('click', () => {
     logout();
     updateAddEmployeButtonVisibility();
+    updatemanageEmployeButtonVisibility();
   });
 
   document.getElementById('menu').addEventListener('change', handleMenuSelection);
@@ -649,6 +661,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('addEmployePage').style.display = 'none';
     document.getElementById('homePage').style.display = 'block';
   });
+
+
+
+  // Écouteur pour le bouton "Gestion des employés"
+  document.getElementById('manageEmployeButton')?.addEventListener('click', () => {
+    document.getElementById('homePage').style.display = 'none';
+    document.getElementById('manageEmployePage').style.display = 'block';
+    loadEmployeList(); // Charge la liste des employés
+  });
+
+  // Écouteur pour le bouton "Retour"
+  document.getElementById('backToHomeButton4')?.addEventListener('click', () => {
+    document.getElementById('manageEmployePage').style.display = 'none';
+    document.getElementById('homePage').style.display = 'block';
+  });
+
+
+
+
 
   const cancelEditProfileButton = document.getElementById('cancelEditProfileButton');
   const confirmEditProfileButton = document.getElementById('confirmEditProfileButton');
@@ -813,6 +844,253 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   }
+  // Charge et affiche la liste des employés
+// Variables globales pour stocker l'action et l'utilisateur
+let currentAction = null;
+let currentUser = null;
+
+// Ordre des rôles (du plus haut au plus bas)
+const roleHierarchy = ["Admin", "Patron", "Co-Patron", "Chef d'équipe", "Employé", "Stagiaire"];
+
+function openConfirmationModal(action, user) {
+  let title, message;
+
+  switch (action) {
+    case "promote":
+      title = "Promouvoir un employé";
+      message = `Voulez-vous vraiment <strong>promouvoir</strong> "${user.username}" ?
+                 <br><br>Rôle actuel : <strong>${user.role}</strong>
+                 <br>Nouveau rôle : <strong>${roleHierarchy[roleHierarchy.indexOf(user.role) - 1] || "Admin"}</strong>`;
+      break;
+    case "demote":
+      title = "Rétrograder un employé";
+      message = `Voulez-vous vraiment <strong>rétrograder</strong> "${user.username}" ?
+                 <br><br>Rôle actuel : <strong>${user.role}</strong>
+                 <br>Nouveau rôle : <strong>${roleHierarchy[roleHierarchy.indexOf(user.role) + 1] || "Stagiaire"}</strong>`;
+      break;
+    case "delete":
+      title = "Licencier un employé";
+      message = `Voulez-vous vraiment <strong>licencier</strong> "${user.username}" ?
+                 <br><br>⚠️ Cette action est <strong>irréversible</strong> et supprimera définitivement l'employé.`;
+      break;
+    default:
+      title = "Confirmation";
+      message = "Êtes-vous sûr de vouloir effectuer cette action ?";
+  }
+
+  document.getElementById("confirmationModalTitle").innerHTML = title;
+  document.getElementById("confirmationModalMessage").innerHTML = message;
+  document.getElementById("confirmationModal").style.display = "flex";
+
+  currentAction = action;
+  currentUser = user;
+}
+
+// Écouteurs pour les boutons de la modale
+document.getElementById("confirmYes").addEventListener("click", () => {
+  document.getElementById("confirmationModal").style.display = "none";
+
+  if (currentAction === "promote") {
+    promoteEmploye(currentUser);
+  } else if (currentAction === "demote") {
+    demoteEmploye(currentUser);
+  } else if (currentAction === "delete") {
+    deleteEmploye(currentUser.username);
+  }
+});
+
+document.getElementById("confirmNo").addEventListener("click", () => {
+  document.getElementById("confirmationModal").style.display = "none";
+});
+
+// Fonction pour charger la liste des employés
+async function loadEmployeList() {
+  try {
+    const result = await fetchData("getUsers");
+    console.log("Données reçues :", result);
+
+    if (!result || !result.length) {
+      setStatus("Aucun employé trouvé.", false, "manageEmployeError");
+      return;
+    }
+
+    allEmployees = result; // Stocke les employés dans la variable globale
+
+    const employeListElement = document.getElementById("employeList");
+    employeListElement.innerHTML = "";
+
+    allEmployees.forEach(employe => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${employe.id}</td>
+        <td>${employe.employe || employe.username}</td>
+        <td>${employe.role}</td>
+        <td>
+          <button class="promote-btn" data-username="${employe.username}" title="Promouvoir">↑</button>
+          <button class="demote-btn" data-username="${employe.username}" title="Rétrograder">↓</button>
+          <button class="delete-btn" data-username="${employe.username}" title="Licencier">✕</button>
+        </td>
+      `;
+      employeListElement.appendChild(row);
+    });
+
+    // Écouteurs pour les boutons d'actions
+    document.querySelectorAll(".promote-btn").forEach(button => {
+      button.addEventListener("click", (e) => {
+        const username = e.target.dataset.username;
+        const user = allEmployees.find(u => u.username === username);
+        if (user) {
+          openConfirmationModal("promote", user);
+        }
+      });
+    });
+
+    document.querySelectorAll(".demote-btn").forEach(button => {
+      button.addEventListener("click", (e) => {
+        const username = e.target.dataset.username;
+        const user = allEmployees.find(u => u.username === username);
+        if (user) {
+          openConfirmationModal("demote", user);
+        }
+      });
+    });
+
+    document.querySelectorAll(".delete-btn").forEach(button => {
+      button.addEventListener("click", (e) => {
+        const username = e.target.dataset.username;
+        const user = allEmployees.find(u => u.username === username);
+        if (user) {
+          openConfirmationModal("delete", user);
+        }
+      });
+    });
+
+  } catch (error) {
+    console.error("Erreur:", error);
+    setStatus(`Erreur : ${error.message}`, true, "manageEmployeError");
+  }
+}
+
+// Fonction pour promouvoir un employé
+async function promoteEmploye(user) {
+  try {
+    const currentIndex = roleHierarchy.indexOf(user.role);
+    if (currentIndex <= 0) {
+      setStatus(`L'employé "${user.username}" a déjà le rôle maximum (Admin).`, false, "manageEmployeError");
+      return;
+    }
+
+    const newRole = roleHierarchy[currentIndex - 1];
+    const response = await fetch(webAppUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "updateEmployeRole",
+        username: user.username,
+        newRole: newRole
+      })
+    });
+
+    setStatus(`L'employé "${user.username}" a été promu "${newRole}".`, false, "manageEmployeError");
+    loadEmployeList();
+
+  } catch (error) {
+    setStatus(`Erreur lors de la promotion : ${error.message}`, true, "manageEmployeError");
+  }
+}
+
+// Fonction pour rétrograder un employé
+async function demoteEmploye(user) {
+  try {
+    const currentIndex = roleHierarchy.indexOf(user.role);
+    if (currentIndex >= roleHierarchy.length - 1) {
+      setStatus(`L'employé "${user.username}" a déjà le rôle minimum (Stagiaire).`, false, "manageEmployeError");
+      return;
+    }
+
+    const newRole = roleHierarchy[currentIndex + 1];
+    const response = await fetch(webAppUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "updateEmployeRole",
+        username: user.username,
+        newRole: newRole
+      })
+    });
+
+    setStatus(`L'employé "${user.username}" a été rétrogradé "${newRole}".`, false, "manageEmployeError");
+    loadEmployeList();
+
+  } catch (error) {
+    setStatus(`Erreur lors de la rétrogradation : ${error.message}`, true, "manageEmployeError");
+  }
+}
+
+// Fonction pour supprimer un employé
+async function deleteEmploye(username) {
+  try {
+    const response = await fetch(webAppUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "deleteUser",
+        username: username
+      })
+    });
+
+    setStatus(`L'employé "${username}" a été licencié.`, false, "manageEmployeError");
+    loadEmployeList();
+
+  } catch (error) {
+    setStatus(`Erreur lors du licenciement : ${error.message}`, true, "manageEmployeError");
+  }
+}
+
+
+async function deleteEmploye(username) {
+  try {
+    const response = await fetch(webAppUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "deleteUser",
+        username: username
+      })
+    });
+
+    setStatus(`L'employé "${username}" a été licencié.`, false, "manageEmployeError");
+    loadEmployeList(); // Recharge la liste
+
+  } catch (error) {
+    setStatus(`Erreur lors du licenciement : ${error.message}`, true, "manageEmployeError");
+  }
+}
+
+document.querySelectorAll(".promote-btn").forEach(button => {
+  button.addEventListener("click", (e) => {
+    const username = e.target.dataset.username;
+    if (confirm(`Voulez-vous vraiment promouvoir "${username}" ?`)) {
+      promoteEmploye(username);
+    }
+  });
+});
+
+document.querySelectorAll(".demote-btn").forEach(button => {
+  button.addEventListener("click", (e) => {
+    const username = e.target.dataset.username;
+    if (confirm(`Voulez-vous vraiment rétrograder "${username}" ?`)) {
+      demoteEmploye(username);
+    }
+  });
+});
+
+
+
 
   updateDateInfo();
 });

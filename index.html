@@ -59,6 +59,7 @@
         <button id="goToOrderButton" class="home-button">Prendre une commande clients</button>
         <button id="editProfileButton" class="home-button">Modifier mon profil</button>
         <button id="addEmployeButton" class="home-button">Ajouter un employé</button>
+        <button id="manageEmployeButton" class="home-button">Gestion des employés</button>
         <button id="logoutHomeButton" class="home-button">Déconnexion</button>
       </div>
     </div>
@@ -197,6 +198,51 @@
         </div>
       </div>
     </div>
+
+
+    <div id="manageEmployePage" style="display: none;">
+  <div class="cadre">
+    <div class="container profile-form">
+      <img src="https://i.postimg.cc/sgJn040S/SGS25NG.png" alt="Menu Options" class="banner-image options-button" id="backToHomeButton4">
+      <h2>Gestion des employés</h2>
+      <div id="manageEmployeError" class="status error"></div>
+      <div class="employe-table-container">
+        <table id="employeTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Employé</th>
+              <th>Rôle</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="employeList">
+            <!-- Les employés seront chargés ici dynamiquement -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modale de confirmation -->
+<div id="confirmationModal" class="modal">
+  <div class="modal-content">
+    <div class="cadre">
+      <div class="container">
+        <img src="https://i.postimg.cc/sgJn040S/SGS25NG.png" alt="Bannière" class="banner-image">
+
+        <h3 id="confirmationModalTitle">Confirmation</h3>
+        <p id="confirmationModalMessage">Êtes-vous sûr de vouloir effectuer cette action ?</p>
+        <div class="modal-buttons">
+          <button id="confirmYes" class="home-button">Oui</button>
+          <button id="confirmNo" class="home-button">Non</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
     <script src="script.js"></script>
   </body>
