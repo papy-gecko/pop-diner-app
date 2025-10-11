@@ -108,6 +108,9 @@ input, select {
   text-align: center;
   font-size: clamp(12px, 2vw, 16px);
 }
+.hidden-input {
+    display: none;
+}
 
 input:disabled {
   border: 1px solid #ffffff;
