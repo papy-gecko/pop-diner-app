@@ -181,14 +181,42 @@ function getWeekNumber(d) {
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
 
-// Met à jour la date et la semaine
+// Met à jour la date, le jour et le numéro de semaine pour toutes les pages
 function updateDateInfo() {
   const today = new Date();
   const jours = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
-  document.getElementById('dateJour').value = today.toLocaleDateString('fr-FR');
-  document.getElementById('jourLettre').value = jours[today.getDay()];
-  document.getElementById('numSemaine').value = getWeekNumber(today);
+
+  // Pour la page principale (appContainer)
+  if (document.getElementById('dateJour')) {
+    document.getElementById('dateJour').value = today.toLocaleDateString('fr-FR');
+  }
+  if (document.getElementById('jourLettre')) {
+    document.getElementById('jourLettre').value = jours[today.getDay()];
+  }
+  if (document.getElementById('numSemaine')) {
+    document.getElementById('numSemaine').value = getWeekNumber(today);
+  }
+
+  // Pour la page "Service à table"
+  if (document.getElementById('dateJourTable')) {
+    document.getElementById('dateJourTable').value = today.toLocaleDateString('fr-FR');
+  }
+  if (document.getElementById('jourLettreTable')) {
+    document.getElementById('jourLettreTable').value = jours[today.getDay()];
+  }
+  if (document.getElementById('numSemaineTable')) {
+    document.getElementById('numSemaineTable').value = getWeekNumber(today);
+  }
+
+  // Pour l'employé (si currentUser est défini)
+  if (document.getElementById('employe') && currentUser) {
+    document.getElementById('employe').value = currentUser.employe || currentUser.username;
+  }
+  if (document.getElementById('serviceEmploye') && currentUser) {
+    document.getElementById('serviceEmploye').value = currentUser.employe || currentUser.username;
+  }
 }
+
 
 // Met à jour la quantité si un produit est désélectionné
 function updateQuantityIfEmpty(selectElement) {
@@ -371,34 +399,53 @@ function calculerTotaux() {
   document.getElementById('benefice').value = `${benefice.toFixed(2)} €`;
 }
 
-// Ajoute un nouveau client
 async function ajouterNouveauClient() {
   const nouveauClientInput = document.getElementById('nouveauClientInput');
   const nouveauClient = nouveauClientInput.value.trim();
+
+  // Validation
   if (!nouveauClient) {
     setStatus("Veuillez entrer un nom de client.", true);
     return;
   }
+
+  // Désactive le bouton pendant l'ajout
+  document.getElementById('validerNouveauClient').disabled = true;
   setStatus(`Ajout du client "${nouveauClient}"...`);
+
   try {
+    // Envoi en no-cors (pas de réponse lisible)
     await fetch(webAppUrl, {
       method: "POST",
       mode: "no-cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "ajouterClient",
-        nomClient: nouveauClient
+        nomClient: nouveauClient,
+        employe: currentUser.username,
+        password: currentPassword
       })
     });
-    await loadAllData();
-    document.getElementById('noms_des_client').value = nouveauClient;
-    selectedClient = nouveauClient;
-    document.getElementById('nouveauClientContainer').style.display = 'none';
+
+    // On suppose que l'ajout a réussi
     setStatus(`Client "${nouveauClient}" ajouté avec succès !`);
+
+    // Met à jour la liste des clients après un court délai
+    // (pour laisser le temps au serveur de traiter la requête)
+    setTimeout(async () => {
+      await loadAllData();
+      document.getElementById('noms_des_client').value = nouveauClient;
+      document.getElementById('nouveauClientContainer').style.display = 'none';
+      nouveauClientInput.value = "";
+    }, 1000);
+
   } catch (error) {
-    setStatus(`Erreur lors de l'ajout du client: ${error.message}`, true);
+    setStatus(`Erreur réseau: ${error.message}`, true);
+    document.getElementById('validerNouveauClient').disabled = false;
   }
 }
+
+
 
 // Charge les rôles depuis Google Sheets
 async function chargerRoles() {
@@ -613,11 +660,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  document.getElementById('goToOrderButton').addEventListener('click', () => {
+    document.getElementById('goToOrderButton').addEventListener('click', () => {
     document.getElementById('homePage').style.display = 'none';
     document.getElementById('appContainer').style.display = 'block';
     updateDateInfo();
   });
+
+  document.getElementById('goToTableServiceButton').addEventListener('click', async () => {
+  document.getElementById('homePage').style.display = 'none';
+  document.getElementById('tableServicePage').style.display = 'block';
+  updateDateInfo(); // Met à jour les champs de date et d'employé
+  await updateTableProducts(); // Charge les produits pour le service à table
+});
+
+document.getElementById('validerNouveauClient').addEventListener('click', ajouterNouveauClient);
+
 
   document.getElementById('editProfileButton').addEventListener('click', () => {
     document.getElementById('homePage').style.display = 'none';
@@ -659,6 +716,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('backToHomeButton3').addEventListener('click', () => {
     document.getElementById('addEmployePage').style.display = 'none';
+    document.getElementById('homePage').style.display = 'block';
+  });
+  document.getElementById('backToHomeButton5').addEventListener('click', () => {
+    document.getElementById('tableServicePage').style.display = 'none';
     document.getElementById('homePage').style.display = 'block';
   });
 
@@ -844,10 +905,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   }
-  // Charge et affiche la liste des employés
-// Variables globales pour stocker l'action et l'utilisateur
-let currentAction = null;
-let currentUser = null;
 
 // Ordre des rôles (du plus haut au plus bas)
 const roleHierarchy = ["Admin", "Patron", "Co-Patron", "Chef d'équipe", "Employé", "Stagiaire"];
@@ -1089,6 +1146,172 @@ document.querySelectorAll(".demote-btn").forEach(button => {
   });
 });
 
+// Écouteur pour la touche "Entrée" dans .product-incrementation
+document.querySelectorAll('.product-incrementation').forEach(input => {
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const position = input.dataset.position;
+      const quantityInput = document.querySelector(`.product-incrementation[data-position="${position}"]`);
+      const sumInput = document.querySelector(`.product-sum[data-position="${position}"]`);
+
+      const incrementValue = parseInt(quantityInput.value) || 0;
+      const currentSum = parseInt(sumInput.value) || 0;
+
+      sumInput.value = currentSum + incrementValue;
+      quantityInput.value = 0;
+
+      calculerTotauxTable();
+    }
+  });
+});
+
+// Sauvegarder les quantités
+document.getElementById('saveQuantities').addEventListener('click', () => {
+  const quantities = {};
+  for (let i = 1; i <= 11; i++) {
+    const sumInput = document.querySelector(`.product-sum[data-position="${i}"]`);
+    if (sumInput) {
+      quantities[`product${i}`] = sumInput.value;
+    }
+  }
+
+  localStorage.setItem('tableServiceQuantities', JSON.stringify(quantities));
+  setStatus("Quantités sauvegardées !", false, 'tableServiceStatus');
+});
+
+// Réinitialiser les quantités
+document.getElementById('clearQuantities').addEventListener('click', () => {
+  for (let i = 1; i <= 11; i++) {
+    const sumInput = document.querySelector(`.product-sum[data-position="${i}"]`);
+    if (sumInput) {
+      sumInput.value = 0;
+    }
+  }
+
+  localStorage.removeItem('tableServiceQuantities');
+  calculerTotauxTable();
+  setStatus("Quantités réinitialisées !", false, 'tableServiceStatus');
+});
+
+// Fonction pour charger les produits et restaurer les quantités
+async function updateTableProducts() {
+  const products = await fetchData("getTableProducts");
+
+  if (products && products.length > 0) {
+    products.forEach((product, index) => {
+      const position = index + 1;
+      const label = document.getElementById(`produitTable${position}`);
+      const sumInput = document.querySelector(`.product-sum[data-position="${position}"]`);
+
+      if (label && sumInput) {
+        label.textContent = product.name;
+        label.dataset.product = product.name;
+        label.dataset.cost = product.cost;
+        label.dataset.price = product.price;
+
+        // Restaure les quantités sauvegardées
+        const savedQuantities = JSON.parse(localStorage.getItem('tableServiceQuantities')) || {};
+        if (savedQuantities[`product${position}`] !== undefined) {
+          sumInput.value = savedQuantities[`product${position}`];
+        } else {
+          sumInput.value = 0;
+        }
+      }
+    });
+  }
+
+  calculerTotauxTable();
+}
+
+// Fonction pour calculer les totaux
+function calculerTotauxTable() {
+  let coutGlobal = 0;
+  let prixGlobal = 0;
+
+  for (let i = 1; i <= 11; i++) {
+    const label = document.getElementById(`produitTable${i}`);
+    if (label && label.dataset.product) {
+      const sumInput = document.querySelector(`.product-sum[data-position="${i}"]`);
+      const quantity = parseInt(sumInput.value) || 0;
+      const cost = parseFloat(label.dataset.cost) || 0;
+      const price = parseFloat(label.dataset.price) || 0;
+
+      coutGlobal += cost * quantity;
+      prixGlobal += price * quantity;
+    }
+  }
+
+  document.getElementById('coutGlobalMatierePremiereTable').value = `$ ${coutGlobal.toFixed(2)}`;
+  document.getElementById('PrixAFairePayerTable').value = `$ ${prixGlobal.toFixed(2)}`;
+  document.getElementById('beneficeTable').value = `$ ${(prixGlobal - coutGlobal).toFixed(2)}`;
+}
+async function enregistrerCommandeTable() {
+  // Récupère les informations de base
+  const dateJour = document.getElementById('dateJourTable').value;
+  const jourLettre = document.getElementById('jourLettreTable').value;
+  const numSemaine = document.getElementById('numSemaineTable').value;
+  const employe = document.getElementById('serviceEmploye').value;
+
+  // Initialise le tableau de données
+  const rowData = [
+    dateJour,          // Colonne A: Date du jour
+    jourLettre,        // Colonne B: Jour
+    numSemaine,        // Colonne C: N° de semaine
+    employe,           // Colonne D: Employé
+  ];
+
+  // Ajoute uniquement les quantités des produits
+  for (let i = 1; i <= 11; i++) {
+    const sumInput = document.querySelector(`.product-sum[data-position="${i}"]`);
+    const quantity = parseInt(sumInput.value) || 0;
+    rowData.push(quantity); // Colonne E, F, G, etc.: Quantité
+  }
+
+  // Ajoute les totaux
+  const coutGlobal = parseFloat(document.getElementById('coutGlobalMatierePremiereTable').value.replace('$ ', '')) || 0;
+  const prixGlobal = parseFloat(document.getElementById('PrixAFairePayerTable').value.replace('$ ', '')) || 0;
+  const benefice = parseFloat(document.getElementById('beneficeTable').value.replace('$ ', '')) || 0;
+
+  rowData.push(coutGlobal);  // Colonne U: Coût global matière première
+  rowData.push(prixGlobal);  // Colonne V: Prix à faire payer
+  rowData.push(benefice);     // Colonne W: Bénéfice
+
+  // Envoie les données au backend en mode no-cors
+  try {
+    setStatus("Enregistrement de la commande en cours...", false, 'tableServiceStatus');
+
+    // Envoi des données sans attendre de réponse
+    await fetch(webAppUrl, {
+      method: "POST",
+      mode: "no-cors",  // Mode no-cors
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "enregistrerCommandeTable",
+        data: rowData
+      })
+    });
+
+    // On suppose que la requête a réussi
+    setStatus("Commande enregistrée avec succès !", false, 'tableServiceStatus');
+
+    // Réinitialise les quantités après enregistrement
+    for (let i = 1; i <= 11; i++) {
+      const sumInput = document.querySelector(`.product-sum[data-position="${i}"]`);
+      if (sumInput) sumInput.value = 0;
+    }
+
+    // Efface les données sauvegardées en localStorage
+    localStorage.removeItem('tableServiceQuantities');
+
+    // Recalcule les totaux
+    calculerTotauxTable();
+  } catch (error) {
+    // En cas d'erreur réseau ou autre
+    setStatus(`Erreur lors de l'enregistrement: ${error.message}`, true, 'tableServiceStatus');
+  }
+}
+document.getElementById('enregistrerTableService').addEventListener('click', enregistrerCommandeTable);
 
 
 

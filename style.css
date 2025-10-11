@@ -1083,3 +1083,278 @@ input[type="checkbox"] {
     max-width: 90%;
   }
 }
+/* =============================
+   Styles pour la page "Service à table" (version finale corrigée)
+   ============================= */
+#tableServicePage {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1001;
+  overflow-y: auto;
+}
+
+/* Cadre principal (identique à .appContainer) */
+#tableServicePage .cadre {
+  background: #5ebec9;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  box-sizing: border-box;
+  margin: 20px auto;
+  display: block;
+  border: 1px solid #ffffff;
+}
+
+/* Container principal (2 colonnes comme .appContainer) */
+#tableServicePage .container {
+  border: 1px solid #ffffff;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  background: #000000;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Bannière (identique à .appContainer) */
+#tableServicePage .banner-image {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: auto;
+  max-height: 150px;
+  object-fit: contain;
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* Ligne générique */
+#tableServicePage .form-row {
+  display: contents;
+}
+
+/* Tous les labels (texte blanc et taille identique à .appContainer) */
+#tableServicePage .form-label {
+  grid-column: 1;
+  border: 1px solid #ffffff;
+  background: #e91e63;
+  padding: 5px;
+  border-radius: 3px;
+  font-weight: bold;
+  text-align: center;
+  color: white; /* Texte blanc comme dans le reste */
+  font-size: clamp(12px, 2vw, 16px); /* Même taille que dans .appContainer */
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* Inputs classiques (identiques à .appContainer) */
+#tableServicePage .form-input {
+  grid-column: 2;
+  border: 1px solid #ffffff;
+  background: #b2ebf2;
+  padding: 5px;
+  border-radius: 3px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: clamp(12px, 2vw, 16px); /* Même taille */
+  color: #000;
+  min-height: 30px;
+}
+
+/* Conteneur pour les inputs de produit */
+#tableServicePage .product-inputs {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+/* Input d'incrémentation */
+#tableServicePage .product-incrementation {
+  border: 1px solid #ffffff;
+  background: #b2ebf2;
+  padding: 5px;
+  border-radius: 3px;
+  text-align: center;
+  font-size: clamp(12px, 2vw, 14px);
+  color: #000;
+  min-height: 40px;
+  width: 95%;
+}
+
+/* Input de quantité (fond turquoise comme demandé) */
+#tableServicePage .product-sum {
+  border: 1px solid #ffffff;
+  background: #4dd0e1;
+  padding: 5px;
+  border-radius: 3px;
+  text-align: center;
+  font-weight: bold;
+  font-size: clamp(12px, 2vw, 14px);
+  color: #000;
+  min-height: 30px;
+  transform: translateX(5px); 
+  width: 97%;
+}
+
+/* Ligne pour le ticket restaurant */
+#tableServicePage .ticket-row {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  width: 100%;
+}
+
+#tableServicePage .ticket-row input[type="checkbox"] {
+  justify-self: center;
+  width: auto;
+  transform: scale(1.5);
+  margin: 0;
+}
+
+#tableServicePage .ticket-row input[type="number"] {
+  justify-self: end;
+  width: clamp(100px, 10vw, 80px);
+  font-size: clamp(12px, 2vw, 16px);
+  border: 1px solid #ffffff;
+  background: #b2ebf2;
+  padding: 5px;
+  border-radius: 3px;
+  text-align: center;
+}
+
+/* Boutons Sauvegarder/Réinitialiser */
+#tableServicePage .buttons-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+#tableServicePage .save-button,
+#tableServicePage .clear-button {
+  background: #e91e63; /* Couleur rose comme les autres boutons */
+  color: white;
+  border: 1px solid #ffffff;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  text-align: center;
+}
+
+#tableServicePage .save-button {
+  background: #4CAF50; /* Vert pour Sauvegarder */
+}
+
+#tableServicePage .clear-button {
+  background: #ff9800; /* Orange pour Réinitialiser */
+}
+
+/* Bouton Enregistrer (identique à #enregistrer dans .appContainer) */
+#tableServicePage .enregistrer-button {
+  grid-column: 1 / -1;
+  background: #fa2759;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 10px;
+  border: 1px solid #ffffff;
+}
+
+/* Statut (identique au reste) */
+#tableServicePage .status {
+  grid-column: 1 / -1;
+  color: #4CAF50;
+  font-size: clamp(12px, 2vw, 14px);
+  text-align: center;
+  padding: 6px;
+  margin-top: 10px;
+}
+
+#tableServicePage .status.error {
+  color: #f44336;
+  background: rgba(244, 67, 54, 0.1);
+  border-radius: 4px;
+}
+
+/* Adaptation mobile (identique au style global) */
+@media (max-width: 480px) {
+  #tableServicePage .cadre {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 10px;
+    border-radius: 0;
+    border: none;
+    box-sizing: border-box;
+  }
+
+  #tableServicePage .container {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    gap: 0;
+  }
+
+  #tableServicePage .form-row {
+    display: flex;
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  #tableServicePage .form-label,
+  #tableServicePage .form-input,
+  #tableServicePage .product-inputs {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  #tableServicePage .product-inputs {
+    display: flex;
+  }
+
+  #tableServicePage label,
+  #tableServicePage input,
+  #tableServicePage select,
+  #tableServicePage button {
+    font-size: clamp(12px, 4vw, 16px);
+    border: 1px solid #ffffff;
+  }
+
+  #tableServicePage .banner-image {
+    max-height: 50px;
+  }
+}
+/* Champs cachés pour Jour et N° de semaine */
+.hidden-input {
+  display: none !important;
+}
+
+/* Adaptation pour mobile des champs cachés */
+@media (max-width: 480px) {
+  .hidden-input {
+    display: none !important;
+  }
+}
