@@ -173,12 +173,12 @@ function logout() {
 }
 
 // Calcule le numéro de la semaine
-function getWeekNumber(d) {
-  d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+function getWeekNumberSunday(d) {
+  d = new Date(d.getFullYear(), d.getMonth(), d.getDate()); // date locale
+  const start = new Date(d.getFullYear(), 0, 1); // 1er janvier
+  const dayDiff = (d - start) / 86400000; // différence en jours
+  // Ajouter le jour de la semaine de départ (dimanche = 0)
+  return Math.ceil((dayDiff + start.getDay() + 1) / 7);
 }
 
 // Met à jour la date, le jour et le numéro de semaine pour toutes les pages
