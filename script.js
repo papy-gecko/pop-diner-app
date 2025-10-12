@@ -172,7 +172,6 @@ function logout() {
   updatemanageEmployeButtonVisibility();
 }
 
-// Calcule le numéro de la semaine
 function getWeekNumberSunday(d) {
   d = new Date(d.getFullYear(), d.getMonth(), d.getDate()); // date locale
   const start = new Date(d.getFullYear(), 0, 1); // 1er janvier
@@ -180,6 +179,7 @@ function getWeekNumberSunday(d) {
   // Ajouter le jour de la semaine de départ (dimanche = 0)
   return Math.ceil((dayDiff + start.getDay() + 1) / 7);
 }
+
 
 // Met à jour la date, le jour et le numéro de semaine pour toutes les pages
 function updateDateInfo() {
@@ -1261,30 +1261,29 @@ async function enregistrerCommandeTable() {
     employe,           // Colonne D: Employé
   ];
 
-  // Ajoute uniquement les quantités des produits
+  // Ajoute uniquement les quantités des produits (colonnes E à O)
   for (let i = 1; i <= 11; i++) {
     const sumInput = document.querySelector(`.product-sum[data-position="${i}"]`);
     const quantity = parseInt(sumInput.value) || 0;
-    rowData.push(quantity); // Colonne E, F, G, etc.: Quantité
+    rowData.push(quantity); // Colonnes E à O: Quantités
   }
 
-  // Ajoute les totaux
+  // Ajoute les totaux (colonnes P, Q, R)
   const coutGlobal = parseFloat(document.getElementById('coutGlobalMatierePremiereTable').value.replace('$ ', '')) || 0;
   const prixGlobal = parseFloat(document.getElementById('PrixAFairePayerTable').value.replace('$ ', '')) || 0;
   const benefice = parseFloat(document.getElementById('beneficeTable').value.replace('$ ', '')) || 0;
 
-  rowData.push(coutGlobal);  // Colonne U: Coût global matière première
-  rowData.push(prixGlobal);  // Colonne V: Prix à faire payer
-  rowData.push(benefice);     // Colonne W: Bénéfice
+  rowData.push(coutGlobal);  // Colonne P: Coût global matière première
+  rowData.push(prixGlobal);  // Colonne Q: Prix à faire payer
+  rowData.push(benefice);     // Colonne R: Bénéfice
 
   // Envoie les données au backend en mode no-cors
   try {
     setStatus("Enregistrement de la commande en cours...", false, 'tableServiceStatus');
 
-    // Envoi des données sans attendre de réponse
     await fetch(webAppUrl, {
       method: "POST",
-      mode: "no-cors",  // Mode no-cors
+      mode: "no-cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "enregistrerCommandeTable",
@@ -1307,10 +1306,12 @@ async function enregistrerCommandeTable() {
     // Recalcule les totaux
     calculerTotauxTable();
   } catch (error) {
-    // En cas d'erreur réseau ou autre
     setStatus(`Erreur lors de l'enregistrement: ${error.message}`, true, 'tableServiceStatus');
   }
 }
+
+
+
 document.getElementById('enregistrerTableService').addEventListener('click', enregistrerCommandeTable);
 
 
