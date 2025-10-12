@@ -194,7 +194,7 @@ function updateDateInfo() {
     document.getElementById('jourLettre').value = jours[today.getDay()];
   }
   if (document.getElementById('numSemaine')) {
-    document.getElementById('numSemaine').value = getWeekNumber(today);
+    document.getElementById('numSemaine').value = getWeekNumberSunday(today);
   }
 
   // Pour la page "Service à table"
@@ -205,7 +205,7 @@ function updateDateInfo() {
     document.getElementById('jourLettreTable').value = jours[today.getDay()];
   }
   if (document.getElementById('numSemaineTable')) {
-    document.getElementById('numSemaineTable').value = getWeekNumber(today);
+    document.getElementById('numSemaineTable').value = getWeekNumberSunday(today);
   }
 
   // Pour l'employé (si currentUser est défini)
